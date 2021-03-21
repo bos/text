@@ -4,7 +4,7 @@ module Benchmarks.Mul
     ) where
 
 import Control.Exception (evaluate)
-import Criterion.Main
+import Test.Tasty.Bench
 import Data.Int (Int32, Int64)
 import Data.Text.Internal (mul32, mul64)
 import qualified Data.Vector.Unboxed as U

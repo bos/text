@@ -75,12 +75,12 @@ text_ arr off len =
      assert (len == 0 || c < 0xDC00 || c > 0xDFFF) $
 #endif
      Text arr off len
-{-# INLINE text_ #-}
+{-# INLINABLE text_ #-}
 
 -- | /O(1)/ The empty 'Text'.
 empty :: Text
 empty = Text A.empty 0 0
-{-# INLINE [1] empty #-}
+{-# INLINABLE [1] empty #-}
 
 -- | A non-inlined version of 'empty'.
 empty_ :: Text
@@ -92,7 +92,7 @@ empty_ = Text A.empty 0 0
 text :: A.Array -> Int -> Int -> Text
 text arr off len | len == 0  = empty
                  | otherwise = text_ arr off len
-{-# INLINE text #-}
+{-# INLINABLE text #-}
 
 textP :: A.Array -> Int -> Int -> Text
 {-# DEPRECATED textP "Use text instead" #-}
@@ -116,7 +116,7 @@ safe :: Char -> Char
 safe c
     | ord c .&. 0x1ff800 /= 0xd800 = c
     | otherwise                    = '\xfffd'
-{-# INLINE [0] safe #-}
+{-# INLINABLE [0] safe #-}
 
 -- | Apply a function to the first element of an optional pair.
 firstf :: (a -> c) -> Maybe (a,b) -> Maybe (c,b)
@@ -131,7 +131,7 @@ mul a b = fromIntegral $ fromIntegral a `mul64` fromIntegral b
 #else
 mul a b = fromIntegral $ fromIntegral a `mul32` fromIntegral b
 #endif
-{-# INLINE mul #-}
+{-# INLINABLE mul #-}
 infixl 7 `mul`
 
 -- | Checked multiplication.  Calls 'error' if the result would
@@ -142,7 +142,7 @@ mul64 a b
   | a >= 0           = -mul64_ a (-b)
   | b >= 0           = -mul64_ (-a) b
   | otherwise        =  mul64_ (-a) (-b)
-{-# INLINE mul64 #-}
+{-# INLINABLE mul64 #-}
 infixl 7 `mul64`
 
 mul64_ :: Int64 -> Int64 -> Int64
@@ -155,7 +155,7 @@ mul64_ a b
         (# bhi, blo #) = (# b `shiftR` 32, b .&. 0xffffffff #)
         top            = ahi * blo + alo * bhi
         total          = (top `shiftL` 32) + alo * blo
-{-# INLINE mul64_ #-}
+{-# INLINABLE mul64_ #-}
 
 -- | Checked multiplication.  Calls 'error' if the result would
 -- overflow.
@@ -165,7 +165,7 @@ mul32 a b = case fromIntegral a * fromIntegral b of
                  | otherwise                -> fromIntegral ab
   where min32 = -0x80000000 :: Int64
         max32 =  0x7fffffff
-{-# INLINE mul32 #-}
+{-# INLINABLE mul32 #-}
 infixl 7 `mul32`
 
 -- $internals

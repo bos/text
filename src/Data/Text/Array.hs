@@ -106,11 +106,11 @@ class IArray a where
 
 instance IArray Array where
     length = aLen
-    {-# INLINE length #-}
+    {-# INLINABLE length #-}
 
 instance IArray (MArray s) where
     length = maLen
-    {-# INLINE length #-}
+    {-# INLINABLE length #-}
 #endif
 
 -- | Create an uninitialized mutable array.
@@ -126,7 +126,7 @@ new n
                                 #)
   where !(I# len#) = bytesInArray n
         highBit    = maxBound `xor` (maxBound `shiftR` 1)
-{-# INLINE new #-}
+{-# INLINABLE new #-}
 
 array_size_error :: a
 array_size_error = error "Data.Text.Array.new: size overflow"
@@ -140,13 +140,13 @@ unsafeFreeze MArray{..} = ST $ \s1# ->
                              maLen
 #endif
                              #)
-{-# INLINE unsafeFreeze #-}
+{-# INLINABLE unsafeFreeze #-}
 
 -- | Indicate how many bytes would be used for an array of the given
 -- size.
 bytesInArray :: Int -> Int
 bytesInArray n = n `shiftL` 1
-{-# INLINE bytesInArray #-}
+{-# INLINABLE bytesInArray #-}
 
 -- | Unchecked read of an immutable array.  May return garbage or
 -- crash on an out-of-bounds access.
@@ -154,7 +154,7 @@ unsafeIndex :: Array -> Int -> Word16
 unsafeIndex Array{..} i@(I# i#) =
   CHECK_BOUNDS("unsafeIndex",aLen,i)
     case indexWord16Array# aBA i# of r# -> (W16# r#)
-{-# INLINE unsafeIndex #-}
+{-# INLINABLE unsafeIndex #-}
 
 -- | Unchecked write of a mutable array.  May return garbage or crash
 -- on an out-of-bounds access.
@@ -163,7 +163,7 @@ unsafeWrite MArray{..} i@(I# i#) (W16# e#) = ST $ \s1# ->
   CHECK_BOUNDS("unsafeWrite",maLen,i)
   case writeWord16Array# maBA i# e# s1# of
     s2# -> (# s2#, () #)
-{-# INLINE unsafeWrite #-}
+{-# INLINABLE unsafeWrite #-}
 
 -- | Convert an immutable array to a list.
 toList :: Array -> Int -> Int -> [Word16]
@@ -187,7 +187,7 @@ run2 k = runST (do
                  (marr,b) <- k
                  arr <- unsafeFreeze marr
                  return (arr,b))
-{-# INLINE run2 #-}
+{-# INLINABLE run2 #-}
 
 -- | Copy some elements of a mutable array.
 copyM :: MArray s               -- ^ Destination
@@ -206,7 +206,7 @@ copyM dest didx src sidx count
     unsafeIOToST $ memcpyM (maBA dest) (fromIntegral didx)
                            (maBA src) (fromIntegral sidx)
                            (fromIntegral count)
-{-# INLINE copyM #-}
+{-# INLINABLE copyM #-}
 
 -- | Copy some elements of an immutable array.
 copyI :: MArray s               -- ^ Destination
@@ -222,7 +222,7 @@ copyI dest i0 src j0 top
                   memcpyI (maBA dest) (fromIntegral i0)
                           (aBA src) (fromIntegral j0)
                           (fromIntegral (top-i0))
-{-# INLINE copyI #-}
+{-# INLINABLE copyI #-}
 
 -- | Compare portions of two arrays for equality.  No bounds checking
 -- is performed.
@@ -236,7 +236,7 @@ equal arrA offA arrB offB count = inlinePerformIO $ do
   i <- memcmp (aBA arrA) (fromIntegral offA)
                      (aBA arrB) (fromIntegral offB) (fromIntegral count)
   return $! i == 0
-{-# INLINE equal #-}
+{-# INLINABLE equal #-}
 
 foreign import ccall unsafe "_hs_text_memcpy" memcpyI
     :: MutableByteArray# s -> CSize -> ByteArray# -> CSize -> CSize -> IO ()

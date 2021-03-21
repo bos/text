@@ -107,7 +107,7 @@ hex txt
 -- | Read an optional leading sign character (@\'-\'@ or @\'+\'@) and
 -- apply it to the result of applying the given reader.
 signed :: Num a => Reader a -> Reader a
-{-# INLINE signed #-}
+{-# INLINABLE signed #-}
 signed f = runP (signa (P f))
 
 -- | Read a rational number.
@@ -169,7 +169,7 @@ char p = P $ \t -> case T.uncons t of
                      _                 -> Left "character does not match"
 
 floaty :: Fractional a => (Integer -> Integer -> Integer -> a) -> Reader a
-{-# INLINE floaty #-}
+{-# INLINABLE floaty #-}
 floaty f = runP $ do
   sign <- perhaps '+' $ char (\c -> c == '-' || c == '+')
   real <- P decimal

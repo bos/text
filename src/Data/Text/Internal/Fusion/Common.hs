@@ -120,10 +120,10 @@ singleton :: Char -> Stream Char
 singleton c = Stream next False (codePointsSize 1)
     where next False = Yield c True
           next True  = Done
-{-# INLINE [0] singleton #-}
+{-# INLINABLE [0] singleton #-}
 
 streamList :: [a] -> Stream a
-{-# INLINE [0] streamList #-}
+{-# INLINABLE [0] streamList #-}
 streamList s  = Stream next s unknownSize
     where next []       = Done
           next (x:xs)   = Yield x xs
@@ -134,7 +134,7 @@ unstreamList (Stream next s0 _len) = unfold s0
                         Done       -> []
                         Skip s'    -> unfold s'
                         Yield x s' -> x : unfold s'
-{-# INLINE [0] unstreamList #-}
+{-# INLINABLE [0] unstreamList #-}
 
 {-# RULES "STREAM streamList/unstreamList fusion" forall s. streamList (unstreamList s) = s #-}
 
@@ -165,7 +165,7 @@ streamCString# addr = Stream step 0 unknownSize
             !b#    = at# i
     at# (I# i#) = indexCharOffAddr# addr i#
     chr (I# i#) = C# (chr# i#)
-{-# INLINE [0] streamCString# #-}
+{-# INLINABLE [0] streamCString# #-}
 
 -- ----------------------------------------------------------------------------
 -- * Basic stream functions
@@ -182,7 +182,7 @@ cons !w (Stream next0 s0 len) = Stream next (C1 s0) (len + codePointsSize 1)
                           Done -> Done
                           Skip s' -> Skip (C0 s')
                           Yield x s' -> Yield x (C0 s')
-{-# INLINE [0] cons #-}
+{-# INLINABLE [0] cons #-}
 
 data Snoc a = N
             | J !a
@@ -196,7 +196,7 @@ snoc (Stream next0 xs0 len) w = Stream next (J xs0) (len + codePointsSize 1)
       Skip xs'    -> Skip    (J xs')
       Yield x xs' -> Yield x (J xs')
     next N = Done
-{-# INLINE [0] snoc #-}
+{-# INLINABLE [0] snoc #-}
 
 data E l r = L !l
            | R !r
@@ -214,7 +214,7 @@ append (Stream next0 s01 len1) (Stream next1 s02 len2) =
                           Done        -> Done
                           Skip s2'    -> Skip    (R s2')
                           Yield x s2' -> Yield x (R s2')
-{-# INLINE [0] append #-}
+{-# INLINABLE [0] append #-}
 
 -- | /O(1)/ Returns the first character of a Text, which must be non-empty.
 -- Subject to array fusion.
@@ -225,7 +225,7 @@ head (Stream next s0 _len) = loop_head s0
                       Yield x _ -> x
                       Skip s'   -> loop_head s'
                       Done      -> head_empty
-{-# INLINE [0] head #-}
+{-# INLINABLE [0] head #-}
 
 head_empty :: a
 head_empty = streamError "head" "Empty stream"
@@ -240,7 +240,7 @@ uncons (Stream next s0 len) = loop_uncons s0
                          Yield x s1 -> Just (x, Stream next s1 (len - codePointsSize 1))
                          Skip s'    -> loop_uncons s'
                          Done       -> Nothing
-{-# INLINE [0] uncons #-}
+{-# INLINABLE [0] uncons #-}
 
 -- | /O(n)/ Returns the last character of a 'Stream Char', which must
 -- be non-empty.
@@ -255,7 +255,7 @@ last (Stream next s0 _len) = loop0_last s0
                          Done        -> x
                          Skip s'     -> loop_last x  s'
                          Yield x' s' -> loop_last x' s'
-{-# INLINE[0] last #-}
+{-# INLINABLE[0] last #-}
 
 -- | /O(1)/ Returns all characters after the head of a Stream Char, which must
 -- be non-empty.
@@ -270,7 +270,7 @@ tail (Stream next0 s0 len) = Stream next (C0 s0) (len - codePointsSize 1)
                       Done       -> Done
                       Skip s'    -> Skip    (C1 s')
                       Yield x s' -> Yield x (C1 s')
-{-# INLINE [0] tail #-}
+{-# INLINABLE [0] tail #-}
 
 data Init s = Init0 !s
             | Init1 {-# UNPACK #-} !Char !s
@@ -288,7 +288,7 @@ init (Stream next0 s0 len) = Stream next (Init0 s0) (len - codePointsSize 1)
                             Done        -> Done
                             Skip s'     -> Skip    (Init1 x s')
                             Yield x' s' -> Yield x (Init1 x' s')
-{-# INLINE [0] init #-}
+{-# INLINABLE [0] init #-}
 
 -- | /O(1)/ Tests whether a Stream Char is empty or not.
 null :: Stream Char -> Bool
@@ -298,7 +298,7 @@ null (Stream next s0 _len) = loop_null s0
                        Done      -> True
                        Yield _ _ -> False
                        Skip s'   -> loop_null s'
-{-# INLINE[0] null #-}
+{-# INLINABLE[0] null #-}
 
 -- | /O(n)/ Returns the number of characters in a string.
 lengthI :: Integral a => Stream Char -> a
@@ -308,7 +308,7 @@ lengthI (Stream next s0 _len) = loop_length 0 s0
                            Done       -> z
                            Skip    s' -> loop_length z s'
                            Yield _ s' -> loop_length (z + 1) s'
-{-# INLINE[0] lengthI #-}
+{-# INLINABLE[0] lengthI #-}
 
 -- | /O(n)/ Compares the count of characters in a string to a number.
 -- Subject to fusion.
@@ -331,7 +331,7 @@ compareLengthI (Stream next s0 len) n
                          Skip    s' -> loop_cmp z s'
                          Yield _ s' | z > n     -> GT
                                     | otherwise -> loop_cmp (z + 1) s'
-{-# INLINE[0] compareLengthI #-}
+{-# INLINABLE[0] compareLengthI #-}
 
 -- | /O(n)/ Indicate whether a string contains exactly one element.
 isSingleton :: Stream Char -> Bool
@@ -343,7 +343,7 @@ isSingleton (Stream next s0 _len) = loop 0 s0
                      Yield _ s'
                          | z >= 1    -> False
                          | otherwise -> loop (z+1) s'
-{-# INLINE[0] isSingleton #-}
+{-# INLINABLE[0] isSingleton #-}
 
 -- ----------------------------------------------------------------------------
 -- * Stream transformations
@@ -357,7 +357,7 @@ map f (Stream next0 s0 len) = Stream next s0 len
                   Done       -> Done
                   Skip s'    -> Skip s'
                   Yield x s' -> Yield (f x) s'
-{-# INLINE [0] map #-}
+{-# INLINABLE [0] map #-}
 
 {-#
   RULES "STREAM map/map fusion" forall f g s.
@@ -382,7 +382,7 @@ intersperse c (Stream next0 s0 len) = Stream next (I1 s0) (len + unknownSize)
         Done       -> Done
         Skip s'    -> Skip    (I3 s')
         Yield x s' -> Yield c (I2 s' x)
-{-# INLINE [0] intersperse #-}
+{-# INLINABLE [0] intersperse #-}
 
 -- ----------------------------------------------------------------------------
 -- ** Case conversions (folds)
@@ -425,7 +425,7 @@ caseConvert remap (Stream next0 s0 len) =
 -- itself.
 toCaseFold :: Stream Char -> Stream Char
 toCaseFold = caseConvert foldMapping
-{-# INLINE [0] toCaseFold #-}
+{-# INLINABLE [0] toCaseFold #-}
 
 -- | /O(n)/ Convert a string to upper case, using simple case
 -- conversion.  The result string may be longer than the input string.
@@ -433,7 +433,7 @@ toCaseFold = caseConvert foldMapping
 -- sequence SS.
 toUpper :: Stream Char -> Stream Char
 toUpper = caseConvert upperMapping
-{-# INLINE [0] toUpper #-}
+{-# INLINABLE [0] toUpper #-}
 
 -- | /O(n)/ Convert a string to lower case, using simple case
 -- conversion.  The result string may be longer than the input string.
@@ -442,7 +442,7 @@ toUpper = caseConvert upperMapping
 -- combining dot above (U+0307).
 toLower :: Stream Char -> Stream Char
 toLower = caseConvert lowerMapping
-{-# INLINE [0] toLower #-}
+{-# INLINABLE [0] toLower #-}
 
 -- | /O(n)/ Convert a string to title case, using simple case
 -- conversion.
@@ -477,7 +477,7 @@ toTitle (Stream next0 s0 len) = Stream next (CC (False :*: s0) '\0' '\0') (len +
           where nonSpace = P.not (isSpace c)
                 letter'  = isLetter c
     next (CC s a b)      = Yield a (CC s b '\0')
-{-# INLINE [0] toTitle #-}
+{-# INLINABLE [0] toTitle #-}
 
 data Justify i s = Just1 !i !s
                  | Just2 !i !s
@@ -494,8 +494,8 @@ justifyLeftI k c (Stream next0 s0 len) =
     next (Just2 n s)
         | n < k       = Yield c (Just2 (n+1) s)
         | otherwise   = Done
-    {-# INLINE next #-}
-{-# INLINE [0] justifyLeftI #-}
+    {-# INLINABLE next #-}
+{-# INLINABLE [0] justifyLeftI #-}
 
 -- ----------------------------------------------------------------------------
 -- * Reducing Streams (folds)
@@ -510,7 +510,7 @@ foldl f z0 (Stream next s0 _len) = loop_foldl z0 s0
                           Done -> z
                           Skip s' -> loop_foldl z s'
                           Yield x s' -> loop_foldl (f z x) s'
-{-# INLINE [0] foldl #-}
+{-# INLINABLE [0] foldl #-}
 
 -- | A strict version of foldl.
 foldl' :: (b -> Char -> b) -> b -> Stream Char -> b
@@ -520,7 +520,7 @@ foldl' f z0 (Stream next s0 _len) = loop_foldl' z0 s0
                             Done -> z
                             Skip s' -> loop_foldl' z s'
                             Yield x s' -> loop_foldl' (f z x) s'
-{-# INLINE [0] foldl' #-}
+{-# INLINABLE [0] foldl' #-}
 
 -- | foldl1 is a variant of foldl that has no starting value argument,
 -- and thus must be applied to non-empty Streams.
@@ -535,7 +535,7 @@ foldl1 f (Stream next s0 _len) = loop0_foldl1 s0
                            Done -> z
                            Skip s' -> loop_foldl1 z s'
                            Yield x s' -> loop_foldl1 (f z x) s'
-{-# INLINE [0] foldl1 #-}
+{-# INLINABLE [0] foldl1 #-}
 
 -- | A strict version of foldl1.
 foldl1' :: (Char -> Char -> Char) -> Stream Char -> Char
@@ -549,7 +549,7 @@ foldl1' f (Stream next s0 _len) = loop0_foldl1' s0
                              Done -> z
                              Skip s' -> loop_foldl1' z s'
                              Yield x s' -> loop_foldl1' (f z x) s'
-{-# INLINE [0] foldl1' #-}
+{-# INLINABLE [0] foldl1' #-}
 
 -- | 'foldr', applied to a binary operator, a starting value (typically the
 -- right-identity of the operator), and a stream, reduces the stream using the
@@ -561,7 +561,7 @@ foldr f z (Stream next s0 _len) = loop_foldr s0
                         Done -> z
                         Skip s' -> loop_foldr s'
                         Yield x s' -> f x (loop_foldr s')
-{-# INLINE [0] foldr #-}
+{-# INLINABLE [0] foldr #-}
 
 -- | foldr1 is a variant of 'foldr' that has no starting value argument,
 -- and thus must be applied to non-empty streams.
@@ -578,11 +578,11 @@ foldr1 f (Stream next s0 _len) = loop0_foldr1 s0
       Done        -> x
       Skip     s' -> loop_foldr1 x s'
       Yield x' s' -> f x (loop_foldr1 x' s')
-{-# INLINE [0] foldr1 #-}
+{-# INLINABLE [0] foldr1 #-}
 
 intercalate :: Stream Char -> [Stream Char] -> Stream Char
 intercalate s = concat . (L.intersperse s)
-{-# INLINE [0] intercalate #-}
+{-# INLINABLE [0] intercalate #-}
 
 -- ----------------------------------------------------------------------------
 -- ** Special folds
@@ -590,13 +590,13 @@ intercalate s = concat . (L.intersperse s)
 -- | /O(n)/ Concatenate a list of streams. Subject to array fusion.
 concat :: [Stream Char] -> Stream Char
 concat = L.foldr append empty
-{-# INLINE [0] concat #-}
+{-# INLINABLE [0] concat #-}
 
 -- | Map a function over a stream that results in a stream and concatenate the
 -- results.
 concatMap :: (Char -> Stream Char) -> Stream Char -> Stream Char
 concatMap f = foldr (append . f) empty
-{-# INLINE [0] concatMap #-}
+{-# INLINABLE [0] concatMap #-}
 
 -- | /O(n)/ any @p @xs determines if any character in the stream
 -- @xs@ satisfies the predicate @p@.
@@ -608,7 +608,7 @@ any p (Stream next0 s0 _len) = loop_any s0
                       Skip s'                -> loop_any s'
                       Yield x s' | p x       -> True
                                  | otherwise -> loop_any s'
-{-# INLINE [0] any #-}
+{-# INLINABLE [0] any #-}
 
 -- | /O(n)/ all @p @xs determines if all characters in the 'Text'
 -- @xs@ satisfy the predicate @p@.
@@ -620,7 +620,7 @@ all p (Stream next0 s0 _len) = loop_all s0
                       Skip s'                -> loop_all s'
                       Yield x s' | p x       -> loop_all s'
                                  | otherwise -> False
-{-# INLINE [0] all #-}
+{-# INLINABLE [0] all #-}
 
 -- | /O(n)/ maximum returns the maximum value from a stream, which must be
 -- non-empty.
@@ -637,7 +637,7 @@ maximum (Stream next0 s0 _len) = loop0_maximum s0
                              Yield x s'
                                  | x > z     -> loop_maximum x s'
                                  | otherwise -> loop_maximum z s'
-{-# INLINE [0] maximum #-}
+{-# INLINABLE [0] maximum #-}
 
 -- | /O(n)/ minimum returns the minimum value from a 'Text', which must be
 -- non-empty.
@@ -654,7 +654,7 @@ minimum (Stream next0 s0 _len) = loop0_minimum s0
                              Yield x s'
                                  | x < z     -> loop_minimum x s'
                                  | otherwise -> loop_minimum z s'
-{-# INLINE [0] minimum #-}
+{-# INLINABLE [0] minimum #-}
 
 -- -----------------------------------------------------------------------------
 -- * Building streams
@@ -662,14 +662,14 @@ minimum (Stream next0 s0 _len) = loop0_minimum s0
 scanl :: (Char -> Char -> Char) -> Char -> Stream Char -> Stream Char
 scanl f z0 (Stream next0 s0 len) = Stream next (Scan1 z0 s0) (len+1) -- HINT maybe too low
   where
-    {-# INLINE next #-}
+    {-# INLINABLE next #-}
     next (Scan1 z s) = Yield z (Scan2 z s)
     next (Scan2 z s) = case next0 s of
                          Yield x s' -> let !x' = f z x
                                        in Yield x' (Scan2 x' s')
                          Skip s'    -> Skip (Scan2 z s')
                          Done       -> Done
-{-# INLINE [0] scanl #-}
+{-# INLINABLE [0] scanl #-}
 
 -- -----------------------------------------------------------------------------
 -- ** Generating and unfolding streams
@@ -681,7 +681,7 @@ replicateCharI !n !c
   where
     next !i | i >= n    = Done
             | otherwise = Yield c (i + 1)
-{-# INLINE [0] replicateCharI #-}
+{-# INLINABLE [0] replicateCharI #-}
 
 data RI s = RI !s {-# UNPACK #-} !Int64
 
@@ -695,7 +695,7 @@ replicateI n (Stream next0 s0 len) =
                         Done       -> Skip    (RI s0 (k+1))
                         Skip s'    -> Skip    (RI s' k)
                         Yield x s' -> Yield x (RI s' k)
-{-# INLINE [0] replicateI #-}
+{-# INLINABLE [0] replicateI #-}
 
 -- | /O(n)/, where @n@ is the length of the result. The unfoldr function
 -- is analogous to the List 'unfoldr'. unfoldr builds a stream
@@ -706,11 +706,11 @@ replicateI n (Stream next0 s0 len) =
 unfoldr :: (a -> Maybe (Char,a)) -> a -> Stream Char
 unfoldr f s0 = Stream next s0 unknownSize
     where
-      {-# INLINE next #-}
+      {-# INLINABLE next #-}
       next !s = case f s of
                  Nothing      -> Done
                  Just (w, s') -> Yield w s'
-{-# INLINE [0] unfoldr #-}
+{-# INLINABLE [0] unfoldr #-}
 
 -- | /O(n)/ Like 'unfoldr', 'unfoldrNI' builds a stream from a seed
 -- value. However, the length of the result is limited by the
@@ -720,12 +720,12 @@ unfoldrNI :: Integral a => a -> (b -> Maybe (Char,b)) -> b -> Stream Char
 unfoldrNI n f s0 | n <  0    = empty
                  | otherwise = Stream next (0 :*: s0) (maxSize $ fromIntegral (n*2))
     where
-      {-# INLINE next #-}
+      {-# INLINABLE next #-}
       next (z :*: s) = case f s of
           Nothing                  -> Done
           Just (w, s') | z >= n    -> Done
                        | otherwise -> Yield w ((z + 1) :*: s')
-{-# INLINE unfoldrNI #-}
+{-# INLINABLE unfoldrNI #-}
 
 -------------------------------------------------------------------------------
 --  * Substreams
@@ -739,13 +739,13 @@ take n0 (Stream next0 s0 len) =
     where
       n0' = max n0 0
 
-      {-# INLINE next #-}
+      {-# INLINABLE next #-}
       next (n :*: s) | n <= 0    = Done
                      | otherwise = case next0 s of
                                      Done -> Done
                                      Skip s' -> Skip (n :*: s')
                                      Yield x s' -> Yield x ((n-1) :*: s')
-{-# INLINE [0] take #-}
+{-# INLINABLE [0] take #-}
 
 data Drop a s = NS !s
               | JS !a !s
@@ -759,7 +759,7 @@ drop n0 (Stream next0 s0 len) =
   where
     n0' = max n0 0
 
-    {-# INLINE next #-}
+    {-# INLINABLE next #-}
     next (JS n s)
       | n <= 0    = Skip (NS s)
       | otherwise = case next0 s of
@@ -770,26 +770,26 @@ drop n0 (Stream next0 s0 len) =
       Done       -> Done
       Skip    s' -> Skip    (NS s')
       Yield x s' -> Yield x (NS s')
-{-# INLINE [0] drop #-}
+{-# INLINABLE [0] drop #-}
 
 -- | 'takeWhile', applied to a predicate @p@ and a stream, returns the
 -- longest prefix (possibly empty) of elements that satisfy @p@.
 takeWhile :: (Char -> Bool) -> Stream Char -> Stream Char
 takeWhile p (Stream next0 s0 len) = Stream next s0 (len - unknownSize)
     where
-      {-# INLINE next #-}
+      {-# INLINABLE next #-}
       next !s = case next0 s of
                   Done    -> Done
                   Skip s' -> Skip s'
                   Yield x s' | p x       -> Yield x s'
                              | otherwise -> Done
-{-# INLINE [0] takeWhile #-}
+{-# INLINABLE [0] takeWhile #-}
 
 -- | @'dropWhile' p xs@ returns the suffix remaining after @'takeWhile' p xs@.
 dropWhile :: (Char -> Bool) -> Stream Char -> Stream Char
 dropWhile p (Stream next0 s0 len) = Stream next (L s0) (len - unknownSize)
     where
-    {-# INLINE next #-}
+    {-# INLINABLE next #-}
     next (L s)  = case next0 s of
       Done                   -> Done
       Skip    s'             -> Skip    (L s')
@@ -799,7 +799,7 @@ dropWhile p (Stream next0 s0 len) = Stream next (L s0) (len - unknownSize)
       Done       -> Done
       Skip    s' -> Skip    (R s')
       Yield x s' -> Yield x (R s')
-{-# INLINE [0] dropWhile #-}
+{-# INLINABLE [0] dropWhile #-}
 
 -- | /O(n)/ The 'isPrefixOf' function takes two 'Stream's and returns
 -- 'True' iff the first is a prefix of the second.
@@ -813,7 +813,7 @@ isPrefixOf (Stream next1 s1 _) (Stream next2 s2 _) = loop (next1 s1) (next2 s2)
       loop x1             (Skip s2')     = loop x1          (next2 s2')
       loop (Yield x1 s1') (Yield x2 s2') = x1 == x2 &&
                                            loop (next1 s1') (next2 s2')
-{-# INLINE [0] isPrefixOf #-}
+{-# INLINABLE [0] isPrefixOf #-}
 
 -- ----------------------------------------------------------------------------
 -- * Searching
@@ -830,7 +830,7 @@ elem w (Stream next s0 _len) = loop_elem s0
                        Skip s' -> loop_elem s'
                        Yield x s' | x == w -> True
                                   | otherwise -> loop_elem s'
-{-# INLINE [0] elem #-}
+{-# INLINABLE [0] elem #-}
 
 -------------------------------------------------------------------------------
 -- ** Searching with a predicate
@@ -847,7 +847,7 @@ findBy p (Stream next s0 _len) = loop_find s0
                        Skip s' -> loop_find s'
                        Yield x s' | p x -> Just x
                                   | otherwise -> loop_find s'
-{-# INLINE [0] findBy #-}
+{-# INLINABLE [0] findBy #-}
 
 -- | /O(n)/ Stream index (subscript) operator, starting from 0.
 indexI :: Integral a => Stream Char -> a -> Char
@@ -860,7 +860,7 @@ indexI (Stream next s0 _len) n0
       Skip    s'             -> loop_index  n    s'
       Yield x s' | n == 0    -> x
                  | otherwise -> loop_index (n-1) s'
-{-# INLINE [0] indexI #-}
+{-# INLINABLE [0] indexI #-}
 
 -- | /O(n)/ 'filter', applied to a predicate and a stream,
 -- returns a stream containing those characters that satisfy the
@@ -874,7 +874,7 @@ filter p (Stream next0 s0 len) =
                 Skip    s'             -> Skip    s'
                 Yield x s' | p x       -> Yield x s'
                            | otherwise -> Skip    s'
-{-# INLINE [0] filter #-}
+{-# INLINABLE [0] filter #-}
 
 {-# RULES
   "STREAM filter/filter fusion" forall p q s.
@@ -888,7 +888,7 @@ findIndexI :: Integral a => (Char -> Bool) -> Stream Char -> Maybe a
 findIndexI p s = case findIndicesI p s of
                   (i:_) -> Just i
                   _     -> Nothing
-{-# INLINE [0] findIndexI #-}
+{-# INLINABLE [0] findIndexI #-}
 
 -- | The 'findIndicesI' function takes a predicate and a stream and
 -- returns all indices of the elements in the stream satisfying the
@@ -901,7 +901,7 @@ findIndicesI p (Stream next s0 _len) = loop_findIndex 0 s0
       Skip    s'             -> loop_findIndex i     s' -- hmm. not caught by QC
       Yield x s' | p x       -> i : loop_findIndex (i+1) s'
                  | otherwise -> loop_findIndex (i+1) s'
-{-# INLINE [0] findIndicesI #-}
+{-# INLINABLE [0] findIndicesI #-}
 
 -------------------------------------------------------------------------------
 -- * Zipping
@@ -925,7 +925,7 @@ zipWith f (Stream next0 sa0 len1) (Stream next1 sb0 len2) =
                              Done -> Done
                              Skip sb' -> Skip (Z2 sa' sb' a)
                              Yield b sb' -> Yield (f a b) (Z1 sa' sb')
-{-# INLINE [0] zipWith #-}
+{-# INLINABLE [0] zipWith #-}
 
 -- | /O(n)/ The 'countCharI' function returns the number of times the
 -- query element appears in the given stream.
@@ -937,7 +937,7 @@ countCharI a (Stream next s0 _len) = loop 0 s0
       Skip    s'             -> loop i s'
       Yield x s' | a == x    -> loop (i+1) s'
                  | otherwise -> loop i s'
-{-# INLINE [0] countCharI #-}
+{-# INLINABLE [0] countCharI #-}
 
 streamError :: String -> String -> a
 streamError func msg = P.error $ "Data.Text.Internal.Fusion.Common." ++ func ++ ": " ++ msg

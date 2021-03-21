@@ -78,14 +78,14 @@ stream (Text arr off len) = Stream next off (betweenSize (len `shiftR` 1) len)
           where
             n  = A.unsafeIndex arr i
             n2 = A.unsafeIndex arr (i + 1)
-{-# INLINE [0] stream #-}
+{-# INLINABLE [0] stream #-}
 
 -- | /O(n)/ Convert a 'Text' into a 'Stream Char', but iterate
 -- backwards.
 reverseStream :: Text -> Stream Char
 reverseStream (Text arr off len) = Stream next (off+len-1) (betweenSize (len `shiftR` 1) len)
     where
-      {-# INLINE next #-}
+      {-# INLINABLE next #-}
       next !i
           | i < off                    = Done
           | n >= 0xDC00 && n <= 0xDFFF = Yield (U16.chr2 n2 n) (i - 2)
@@ -93,7 +93,7 @@ reverseStream (Text arr off len) = Stream next (off+len-1) (betweenSize (len `sh
           where
             n  = A.unsafeIndex arr i
             n2 = A.unsafeIndex arr (i - 1)
-{-# INLINE [0] reverseStream #-}
+{-# INLINABLE [0] reverseStream #-}
 
 -- | /O(n)/ Convert a 'Stream Char' into a 'Text'.
 unstream :: Stream Char -> Text
@@ -127,7 +127,7 @@ unstream (Stream next0 s0 len) = runText $ \done -> do
             outer arr' (newlen - 1) si di
 
   outer arr0 (mlen - 1) s0 0
-{-# INLINE [0] unstream #-}
+{-# INLINABLE [0] unstream #-}
 {-# RULES "STREAM stream/unstream fusion" forall s. stream (unstream s) = s #-}
 
 
@@ -136,7 +136,7 @@ unstream (Stream next0 s0 len) = runText $ \done -> do
 
 length :: Stream Char -> Int
 length = S.lengthI
-{-# INLINE[0] length #-}
+{-# INLINABLE[0] length #-}
 
 -- | /O(n)/ Reverse the characters of a string.
 reverse :: Stream Char -> Text
@@ -171,21 +171,21 @@ reverse (Stream next s len0)
                           A.unsafeWrite mar (j-1) lo
                           A.unsafeWrite mar j hi
                           loop t (j-2) l mar
-{-# INLINE [0] reverse #-}
+{-# INLINABLE [0] reverse #-}
 
 -- | /O(n)/ Perform the equivalent of 'scanr' over a list, only with
 -- the input and result reversed.
 reverseScanr :: (Char -> Char -> Char) -> Char -> Stream Char -> Stream Char
 reverseScanr f z0 (Stream next0 s0 len) = Stream next (Scan1 z0 s0) (len+1) -- HINT maybe too low
   where
-    {-# INLINE next #-}
+    {-# INLINABLE next #-}
     next (Scan1 z s) = Yield z (Scan2 z s)
     next (Scan2 z s) = case next0 s of
                          Yield x s' -> let !x' = f x z
                                        in Yield x' (Scan2 x' s')
                          Skip s'    -> Skip (Scan2 z s')
                          Done       -> Done
-{-# INLINE reverseScanr #-}
+{-# INLINABLE reverseScanr #-}
 
 -- | /O(n)/ Like 'unfoldr', 'unfoldrN' builds a stream from a seed
 -- value. However, the length of the result is limited by the
@@ -193,7 +193,7 @@ reverseScanr f z0 (Stream next0 s0 len) = Stream next (Scan1 z0 s0) (len+1) -- H
 -- 'unfoldr' when the length of the result is known.
 unfoldrN :: Int -> (a -> Maybe (Char,a)) -> a -> Stream Char
 unfoldrN n = S.unfoldrNI n
-{-# INLINE [0] unfoldrN #-}
+{-# INLINABLE [0] unfoldrN #-}
 
 -------------------------------------------------------------------------------
 -- ** Indexing streams
@@ -201,20 +201,20 @@ unfoldrN n = S.unfoldrNI n
 -- | /O(n)/ stream index (subscript) operator, starting from 0.
 index :: Stream Char -> Int -> Char
 index = S.indexI
-{-# INLINE [0] index #-}
+{-# INLINABLE [0] index #-}
 
 -- | The 'findIndex' function takes a predicate and a stream and
 -- returns the index of the first element in the stream
 -- satisfying the predicate.
 findIndex :: (Char -> Bool) -> Stream Char -> Maybe Int
 findIndex = S.findIndexI
-{-# INLINE [0] findIndex #-}
+{-# INLINABLE [0] findIndex #-}
 
 -- | /O(n)/ The 'count' function returns the number of times the query
 -- element appears in the given stream.
 countChar :: Char -> Stream Char -> Int
 countChar = S.countCharI
-{-# INLINE [0] countChar #-}
+{-# INLINABLE [0] countChar #-}
 
 -- | /O(n)/ Like a combination of 'map' and 'foldl''. Applies a
 -- function to each element of a 'Text', passing an accumulating
@@ -241,4 +241,4 @@ mapAccumL f z0 (Stream next0 s0 len) = (nz, I.text na 0 nl)
                 where (z',c) = f z x
                       j | ord c < 0x10000 = i
                         | otherwise       = i + 1
-{-# INLINE [0] mapAccumL #-}
+{-# INLINABLE [0] mapAccumL #-}

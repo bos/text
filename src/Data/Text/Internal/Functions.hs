@@ -26,4 +26,4 @@ intersperse sep (x:xs) = x : go xs
   where
     go []     = []
     go (y:ys) = sep : y: go ys
-{-# INLINE intersperse #-}
+{-# INLINABLE intersperse #-}

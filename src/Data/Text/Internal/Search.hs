@@ -86,4 +86,4 @@ indices _needle@(Text narr noff nlen) _haystack@(Text harr hoff hlen)
         where loop !i | i >= hlen     = []
                       | hindex i == c = i : loop (i+1)
                       | otherwise     = loop (i+1)
-{-# INLINE indices #-}
+{-# INLINABLE indices #-}

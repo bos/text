@@ -98,7 +98,7 @@ eq (Stream next1 s1 _) (Stream next2 s2 _) = loop (next1 s1) (next2 s2)
       loop _    Done                     = False
       loop (Yield x1 s1') (Yield x2 s2') = x1 == x2 &&
                                            loop (next1 s1') (next2 s2')
-{-# INLINE [0] eq #-}
+{-# INLINABLE [0] eq #-}
 
 cmp :: (Ord a) => Stream a -> Stream a -> Ordering
 cmp (Stream next1 s1 _) (Stream next2 s2 _) = loop (next1 s1) (next2 s2)
@@ -113,10 +113,10 @@ cmp (Stream next1 s1 _) (Stream next2 s2 _) = loop (next1 s1) (next2 s2)
           case compare x1 x2 of
             EQ    -> loop (next1 s1') (next2 s2')
             other -> other
-{-# INLINE [0] cmp #-}
+{-# INLINABLE [0] cmp #-}
 
 -- | The empty stream.
 empty :: Stream a
 empty = Stream next () 0
     where next _ = Done
-{-# INLINE [0] empty #-}
+{-# INLINABLE [0] empty #-}

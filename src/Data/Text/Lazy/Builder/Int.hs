@@ -83,7 +83,7 @@ boundedDecimal :: (Integral a, Bounded a) => a -> Builder
 boundedDecimal i = decimal' (== minBound) i
 
 decimal' :: (Integral a) => (a -> Bool) -> a -> Builder
-{-# INLINE decimal' #-}
+{-# INLINABLE decimal' #-}
 decimal' p i
     | i < 0 = if p i
               then let (q, r) = i `quotRem` 10
@@ -117,7 +117,7 @@ positive i
 
 posDecimal :: (Integral a) =>
               forall s. MArray s -> Int -> Int -> a -> ST s ()
-{-# INLINE posDecimal #-}
+{-# INLINABLE posDecimal #-}
 posDecimal marr off0 ds v0 = go (off0 + ds - 1) v0
   where go off v
            | v >= 100 = do
@@ -133,17 +133,17 @@ posDecimal marr off0 ds v0 = go (off0 + ds - 1) v0
         get = fromIntegral . B.unsafeIndex digits
 
 minus, zero :: Word16
-{-# INLINE minus #-}
-{-# INLINE zero #-}
+{-# INLINABLE minus #-}
+{-# INLINABLE zero #-}
 minus = 45
 zero = 48
 
 i2w :: (Integral a) => a -> Word16
-{-# INLINE i2w #-}
+{-# INLINABLE i2w #-}
 i2w v = zero + fromIntegral v
 
 countDigits :: (Integral a) => a -> Int
-{-# INLINE countDigits #-}
+{-# INLINABLE countDigits #-}
 countDigits v0
   | fromIntegral v64 == v0 = go 1 v64
   | otherwise              = goBig 1 (fromIntegral v0)
@@ -202,7 +202,7 @@ hexDigit :: Integral a => a -> Builder
 hexDigit n
     | n <= 9    = singleton $! i2d (fromIntegral n)
     | otherwise = singleton $! toEnum (fromIntegral n + 87)
-{-# INLINE hexDigit #-}
+{-# INLINABLE hexDigit #-}
 
 data T = T !Integer !Int
 

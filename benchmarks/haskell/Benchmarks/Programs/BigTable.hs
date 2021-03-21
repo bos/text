@@ -11,7 +11,7 @@ module Benchmarks.Programs.BigTable
     ( benchmark
     ) where
 
-import Criterion (Benchmark, bench, whnfIO)
+import Test.Tasty.Bench (Benchmark, bench, whnfIO)
 import Data.Monoid (mappend, mconcat)
 import Data.Text.Lazy.Builder (Builder, fromText, toLazyText)
 import Data.Text.Lazy.IO (hPutStr)

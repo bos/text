@@ -102,7 +102,7 @@ streamUtf8 onErr bs0 = Stream next (T bs0 S0 0) unknownSize
         where x = B.unsafeIndex ps i
     consume (T Empty S0 _) = Done
     consume st             = decodeError "streamUtf8" "UTF-8" onErr Nothing st
-{-# INLINE [0] streamUtf8 #-}
+{-# INLINABLE [0] streamUtf8 #-}
 
 -- | /O(n)/ Convert a 'ByteString' into a 'Stream Char', using little
 -- endian UTF-16 encoding.
@@ -142,7 +142,7 @@ streamUtf16LE onErr bs0 = Stream next (T bs0 S0 0) unknownSize
         where x = B.unsafeIndex ps i
     consume (T Empty S0 _) = Done
     consume st             = decodeError "streamUtf16LE" "UTF-16LE" onErr Nothing st
-{-# INLINE [0] streamUtf16LE #-}
+{-# INLINABLE [0] streamUtf16LE #-}
 
 -- | /O(n)/ Convert a 'ByteString' into a 'Stream Char', using big
 -- endian UTF-16 encoding.
@@ -182,7 +182,7 @@ streamUtf16BE onErr bs0 = Stream next (T bs0 S0 0) unknownSize
         where x = B.unsafeIndex ps i
     consume (T Empty S0 _) = Done
     consume st             = decodeError "streamUtf16BE" "UTF-16BE" onErr Nothing st
-{-# INLINE [0] streamUtf16BE #-}
+{-# INLINABLE [0] streamUtf16BE #-}
 
 -- | /O(n)/ Convert a 'ByteString' into a 'Stream Char', using big
 -- endian UTF-32 encoding.
@@ -226,7 +226,7 @@ streamUtf32BE onErr bs0 = Stream next (T bs0 S0 0) unknownSize
         where x = B.unsafeIndex ps i
     consume (T Empty S0 _) = Done
     consume st             = decodeError "streamUtf32BE" "UTF-32BE" onErr Nothing st
-{-# INLINE [0] streamUtf32BE #-}
+{-# INLINABLE [0] streamUtf32BE #-}
 
 -- | /O(n)/ Convert a 'ByteString' into a 'Stream Char', using little
 -- endian UTF-32 encoding.
@@ -270,7 +270,7 @@ streamUtf32LE onErr bs0 = Stream next (T bs0 S0 0) unknownSize
         where x = B.unsafeIndex ps i
     consume (T Empty S0 _) = Done
     consume st             = decodeError "streamUtf32LE" "UTF-32LE" onErr Nothing st
-{-# INLINE [0] streamUtf32LE #-}
+{-# INLINABLE [0] streamUtf32LE #-}
 
 -- | /O(n)/ Convert a 'Stream' 'Word8' to a lazy 'ByteString'.
 unstreamChunks :: Int -> Stream Word8 -> ByteString

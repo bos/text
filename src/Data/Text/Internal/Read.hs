@@ -34,7 +34,7 @@ instance Functor (IParser t) where
 
 instance Applicative (IParser t) where
     pure a = P $ \t -> Right (a,t)
-    {-# INLINE pure #-}
+    {-# INLINABLE pure #-}
     (<*>) = ap
 
 instance Monad (IParser t) where
@@ -42,7 +42,7 @@ instance Monad (IParser t) where
     m >>= k  = P $ \t -> case runP m t of
                            Left err     -> Left err
                            Right (a,t') -> runP (k a) t'
-    {-# INLINE (>>=) #-}
+    {-# INLINABLE (>>=) #-}
 
 -- If we ever need a `MonadFail` instance the definition below can be used
 --

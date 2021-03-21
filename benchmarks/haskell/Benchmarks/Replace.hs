@@ -10,7 +10,7 @@ module Benchmarks.Replace
     , initEnv
     ) where
 
-import Criterion (Benchmark, bgroup, bench, nf)
+import Test.Tasty.Bench (Benchmark, bgroup, bench, nf)
 import qualified Data.ByteString.Char8 as B
 import qualified Data.ByteString.Lazy as BL
 import qualified Data.ByteString.Lazy.Search as BL

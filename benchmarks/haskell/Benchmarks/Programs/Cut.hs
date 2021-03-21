@@ -16,12 +16,10 @@ module Benchmarks.Programs.Cut
     ( benchmark
     ) where
 
-import Criterion (Benchmark, bgroup, bench, whnfIO)
-import System.IO (Handle, hPutStr)
+import Test.Tasty.Bench (Benchmark, bgroup, bench, whnfIO)
+import System.IO (Handle)
 import qualified Data.ByteString as B
-import qualified Data.ByteString.Char8 as BC
 import qualified Data.ByteString.Lazy as BL
-import qualified Data.ByteString.Lazy.Char8 as BLC
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as T
 import qualified Data.Text.IO as T
@@ -31,39 +29,13 @@ import qualified Data.Text.Lazy.IO as TL
 
 benchmark :: FilePath -> Handle -> Int -> Int -> Benchmark
 benchmark p sink from to = bgroup "Cut"
-    [ bench' "String" string
-    , bench' "ByteString" byteString
-    , bench' "LazyByteString" lazyByteString
-    , bench' "Text" text
+    [ bench' "Text" text
     , bench' "LazyText" lazyText
     , bench' "TextByteString" textByteString
     , bench' "LazyTextByteString" lazyTextByteString
     ]
   where
     bench' n s = bench n $ whnfIO (s p sink from to)
-
-string :: FilePath -> Handle -> Int -> Int -> IO ()
-string fp sink from to = do
-    s <- readFile fp
-    hPutStr sink $ cut s
-  where
-    cut = unlines . map (take (to - from) . drop from) . lines
-
-byteString :: FilePath -> Handle -> Int -> Int -> IO ()
-byteString fp sink from to = do
-    bs <- B.readFile fp
-    B.hPutStr sink $ cut bs
-  where
-    cut = BC.unlines . map (B.take (to - from) . B.drop from) . BC.lines
-
-lazyByteString :: FilePath -> Handle -> Int -> Int -> IO ()
-lazyByteString fp sink from to = do
-    bs <- BL.readFile fp
-    BL.hPutStr sink $ cut bs
-  where
-    cut = BLC.unlines . map (BL.take (to' - from') . BL.drop from') . BLC.lines
-    from' = fromIntegral from
-    to' = fromIntegral to
 
 text :: FilePath -> Handle -> Int -> Int -> IO ()
 text fp sink from to = do

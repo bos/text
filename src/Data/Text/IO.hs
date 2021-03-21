@@ -286,7 +286,7 @@ commitBuffer :: Handle -> RawCharBuffer -> Int -> Int -> Bool -> Bool
 commitBuffer hdl !raw !sz !count flush release =
   wantWritableHandle "commitAndReleaseBuffer" hdl $
      commitBuffer' raw sz count flush release
-{-# INLINE commitBuffer #-}
+{-# INLINABLE commitBuffer #-}
 
 -- | Write a string to a handle, followed by a newline.
 hPutStrLn :: Handle -> Text -> IO ()

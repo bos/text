@@ -10,7 +10,7 @@ module Benchmarks.EncodeUtf8
     ( benchmark
     ) where
 
-import Criterion (Benchmark, bgroup, bench, whnf)
+import Test.Tasty.Bench (Benchmark, bgroup, bench, whnf)
 import qualified Data.ByteString as B
 import qualified Data.ByteString.Lazy as BL
 import qualified Data.Text as T

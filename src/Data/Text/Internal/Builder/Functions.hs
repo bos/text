@@ -27,7 +27,7 @@ import GHC.Base (chr#,ord#,(+#),Int(I#),Char(C#))
 import Prelude ()
 
 -- | Unsafe conversion for decimal digits.
-{-# INLINE i2d #-}
+{-# INLINABLE i2d #-}
 i2d :: Int -> Char
 i2d (I# i#) = C# (chr# (ord# '0'# +# i#))
 
@@ -35,6 +35,6 @@ i2d (I# i#) = C# (chr# (ord# '0'# +# i#))
 -- left.
 (<>) :: Builder -> Builder -> Builder
 (<>) = mappend
-{-# INLINE (<>) #-}
+{-# INLINABLE (<>) #-}
 
 infixr 4 <>

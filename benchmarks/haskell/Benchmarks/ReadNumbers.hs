@@ -21,7 +21,7 @@ module Benchmarks.ReadNumbers
     , benchmark
     ) where
 
-import Criterion (Benchmark, bgroup, bench, whnf)
+import Test.Tasty.Bench (Benchmark, bgroup, bench, whnf)
 import Data.List (foldl')
 import Numeric (readDec, readFloat, readHex)
 import qualified Data.ByteString.Char8 as B

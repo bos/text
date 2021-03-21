@@ -1,5 +1,4 @@
-benchmarks: >=7.4
-jobs-selection: any
+benchmarks: >=7.6
 doctest: <9.0
 doctest-options: -fobject-code -DINTEGER_GMP
 branches: master

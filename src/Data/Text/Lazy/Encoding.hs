@@ -117,7 +117,7 @@ decodeUtf8With _ _ = empty
 -- 'decodeUtf8With'.
 decodeUtf8 :: B.ByteString -> Text
 decodeUtf8 = decodeUtf8With strictDecode
-{-# INLINE[0] decodeUtf8 #-}
+{-# INLINABLE[0] decodeUtf8 #-}
 
 -- This rule seems to cause performance loss.
 {- RULES "LAZY STREAM stream/decodeUtf8' fusion" [1]
@@ -138,7 +138,7 @@ decodeUtf8' bs = unsafeDupablePerformIO $ do
   where
     rnf Empty        = ()
     rnf (Chunk _ ts) = rnf ts
-{-# INLINE decodeUtf8' #-}
+{-# INLINABLE decodeUtf8' #-}
 
 -- | Encode text using UTF-8 encoding.
 encodeUtf8 :: Text -> B.ByteString
@@ -168,7 +168,7 @@ encodeUtf8Builder =
 -- like JSON or HTML.
 --
 -- @since 1.1.0.0
-{-# INLINE encodeUtf8BuilderEscaped #-}
+{-# INLINABLE encodeUtf8BuilderEscaped #-}
 encodeUtf8BuilderEscaped :: BP.BoundedPrim Word8 -> Text -> B.Builder
 encodeUtf8BuilderEscaped prim =
     foldrChunks (\c b -> TE.encodeUtf8BuilderEscaped prim c `mappend` b) mempty
@@ -176,7 +176,7 @@ encodeUtf8BuilderEscaped prim =
 -- | Decode text from little endian UTF-16 encoding.
 decodeUtf16LEWith :: OnDecodeError -> B.ByteString -> Text
 decodeUtf16LEWith onErr bs = F.unstream (E.streamUtf16LE onErr bs)
-{-# INLINE decodeUtf16LEWith #-}
+{-# INLINABLE decodeUtf16LEWith #-}
 
 -- | Decode text from little endian UTF-16 encoding.
 --
@@ -185,12 +185,12 @@ decodeUtf16LEWith onErr bs = F.unstream (E.streamUtf16LE onErr bs)
 -- invalid data, use 'decodeUtf16LEWith'.
 decodeUtf16LE :: B.ByteString -> Text
 decodeUtf16LE = decodeUtf16LEWith strictDecode
-{-# INLINE decodeUtf16LE #-}
+{-# INLINABLE decodeUtf16LE #-}
 
 -- | Decode text from big endian UTF-16 encoding.
 decodeUtf16BEWith :: OnDecodeError -> B.ByteString -> Text
 decodeUtf16BEWith onErr bs = F.unstream (E.streamUtf16BE onErr bs)
-{-# INLINE decodeUtf16BEWith #-}
+{-# INLINABLE decodeUtf16BEWith #-}
 
 -- | Decode text from big endian UTF-16 encoding.
 --
@@ -199,22 +199,22 @@ decodeUtf16BEWith onErr bs = F.unstream (E.streamUtf16BE onErr bs)
 -- invalid data, use 'decodeUtf16BEWith'.
 decodeUtf16BE :: B.ByteString -> Text
 decodeUtf16BE = decodeUtf16BEWith strictDecode
-{-# INLINE decodeUtf16BE #-}
+{-# INLINABLE decodeUtf16BE #-}
 
 -- | Encode text using little endian UTF-16 encoding.
 encodeUtf16LE :: Text -> B.ByteString
 encodeUtf16LE txt = B.fromChunks (foldrChunks ((:) . TE.encodeUtf16LE) [] txt)
-{-# INLINE encodeUtf16LE #-}
+{-# INLINABLE encodeUtf16LE #-}
 
 -- | Encode text using big endian UTF-16 encoding.
 encodeUtf16BE :: Text -> B.ByteString
 encodeUtf16BE txt = B.fromChunks (foldrChunks ((:) . TE.encodeUtf16BE) [] txt)
-{-# INLINE encodeUtf16BE #-}
+{-# INLINABLE encodeUtf16BE #-}
 
 -- | Decode text from little endian UTF-32 encoding.
 decodeUtf32LEWith :: OnDecodeError -> B.ByteString -> Text
 decodeUtf32LEWith onErr bs = F.unstream (E.streamUtf32LE onErr bs)
-{-# INLINE decodeUtf32LEWith #-}
+{-# INLINABLE decodeUtf32LEWith #-}
 
 -- | Decode text from little endian UTF-32 encoding.
 --
@@ -223,12 +223,12 @@ decodeUtf32LEWith onErr bs = F.unstream (E.streamUtf32LE onErr bs)
 -- invalid data, use 'decodeUtf32LEWith'.
 decodeUtf32LE :: B.ByteString -> Text
 decodeUtf32LE = decodeUtf32LEWith strictDecode
-{-# INLINE decodeUtf32LE #-}
+{-# INLINABLE decodeUtf32LE #-}
 
 -- | Decode text from big endian UTF-32 encoding.
 decodeUtf32BEWith :: OnDecodeError -> B.ByteString -> Text
 decodeUtf32BEWith onErr bs = F.unstream (E.streamUtf32BE onErr bs)
-{-# INLINE decodeUtf32BEWith #-}
+{-# INLINABLE decodeUtf32BEWith #-}
 
 -- | Decode text from big endian UTF-32 encoding.
 --
@@ -237,14 +237,14 @@ decodeUtf32BEWith onErr bs = F.unstream (E.streamUtf32BE onErr bs)
 -- invalid data, use 'decodeUtf32BEWith'.
 decodeUtf32BE :: B.ByteString -> Text
 decodeUtf32BE = decodeUtf32BEWith strictDecode
-{-# INLINE decodeUtf32BE #-}
+{-# INLINABLE decodeUtf32BE #-}
 
 -- | Encode text using little endian UTF-32 encoding.
 encodeUtf32LE :: Text -> B.ByteString
 encodeUtf32LE txt = B.fromChunks (foldrChunks ((:) . TE.encodeUtf32LE) [] txt)
-{-# INLINE encodeUtf32LE #-}
+{-# INLINABLE encodeUtf32LE #-}
 
 -- | Encode text using big endian UTF-32 encoding.
 encodeUtf32BE :: Text -> B.ByteString
 encodeUtf32BE txt = B.fromChunks (foldrChunks ((:) . TE.encodeUtf32BE) [] txt)
-{-# INLINE encodeUtf32BE #-}
+{-# INLINABLE encodeUtf32BE #-}

@@ -329,7 +329,7 @@ equal (Chunk a as) (Chunk b bs) =
 
 instance Eq Text where
     (==) = equal
-    {-# INLINE (==) #-}
+    {-# INLINABLE (==) #-}
 
 instance Ord Text where
     compare = compareText
@@ -446,13 +446,13 @@ textDataType = mkDataType "Data.Text.Lazy.Text" [packConstr]
 -- Subject to fusion.  Performs replacement on invalid scalar values.
 pack :: String -> Text
 pack = unstream . S.streamList . L.map safe
-{-# INLINE [1] pack #-}
+{-# INLINABLE [1] pack #-}
 
 -- | /O(n)/ Convert a 'Text' into a 'String'.
 -- Subject to fusion.
 unpack :: Text -> String
 unpack t = S.unstreamList (stream t)
-{-# INLINE [1] unpack #-}
+{-# INLINABLE [1] unpack #-}
 
 -- | /O(n)/ Convert a literal string into a Text.
 unpackCString# :: Addr# -> Text
@@ -479,7 +479,7 @@ unpackCString# addr# = unstream (S.streamCString# addr#)
 -- Performs replacement on invalid scalar values.
 singleton :: Char -> Text
 singleton c = Chunk (T.singleton c) Empty
-{-# INLINE [1] singleton #-}
+{-# INLINABLE [1] singleton #-}
 
 {-# RULES
 "LAZY TEXT singleton -> fused" [~1] forall c.
@@ -499,12 +499,12 @@ toChunks cs = foldrChunks (:) [] cs
 -- | /O(n)/ Convert a lazy 'Text' into a strict 'T.Text'.
 toStrict :: Text -> T.Text
 toStrict t = T.concat (toChunks t)
-{-# INLINE [1] toStrict #-}
+{-# INLINABLE [1] toStrict #-}
 
 -- | /O(c)/ Convert a strict 'T.Text' into a lazy 'Text'.
 fromStrict :: T.Text -> Text
 fromStrict t = chunk t Empty
-{-# INLINE [1] fromStrict #-}
+{-# INLINABLE [1] fromStrict #-}
 
 -- -----------------------------------------------------------------------------
 -- * Basic functions
@@ -512,7 +512,7 @@ fromStrict t = chunk t Empty
 -- | /O(1)/ Adds a character to the front of a 'Text'.  Subject to fusion.
 cons :: Char -> Text -> Text
 cons c t = Chunk (T.singleton c) t
-{-# INLINE [1] cons #-}
+{-# INLINABLE [1] cons #-}
 
 infixr 5 `cons`
 
@@ -527,7 +527,7 @@ infixr 5 `cons`
 -- entire array in the process, unless fused.  Subject to fusion.
 snoc :: Text -> Char -> Text
 snoc t c = foldrChunks Chunk (singleton c) t
-{-# INLINE [1] snoc #-}
+{-# INLINABLE [1] snoc #-}
 
 {-# RULES
 "LAZY TEXT snoc -> fused" [~1] forall t c.
@@ -539,7 +539,7 @@ snoc t c = foldrChunks Chunk (singleton c) t
 -- | /O(n\/c)/ Appends one 'Text' to another.  Subject to fusion.
 append :: Text -> Text -> Text
 append xs ys = foldrChunks Chunk ys xs
-{-# INLINE [1] append #-}
+{-# INLINABLE [1] append #-}
 
 {-# RULES
 "LAZY TEXT append -> fused" [~1] forall t1 t2.
@@ -555,20 +555,20 @@ uncons Empty        = Nothing
 uncons (Chunk t ts) = Just (T.unsafeHead t, ts')
   where ts' | T.compareLength t 1 == EQ = ts
             | otherwise                 = Chunk (T.unsafeTail t) ts
-{-# INLINE uncons #-}
+{-# INLINABLE uncons #-}
 
 -- | /O(1)/ Returns the first character of a 'Text', which must be
 -- non-empty.  Subject to fusion.
 head :: Text -> Char
 head t = S.head (stream t)
-{-# INLINE head #-}
+{-# INLINABLE head #-}
 
 -- | /O(1)/ Returns all characters after the head of a 'Text', which
 -- must be non-empty.  Subject to fusion.
 tail :: Text -> Text
 tail (Chunk t ts) = chunk (T.tail t) ts
 tail Empty        = emptyError "tail"
-{-# INLINE [1] tail #-}
+{-# INLINABLE [1] tail #-}
 
 {-# RULES
 "LAZY TEXT tail -> fused" [~1] forall t.
@@ -584,7 +584,7 @@ init (Chunk t0 ts0) = go t0 ts0
     where go t (Chunk t' ts) = Chunk t (go t' ts)
           go t Empty         = chunk (T.init t) Empty
 init Empty = emptyError "init"
-{-# INLINE [1] init #-}
+{-# INLINABLE [1] init #-}
 
 {-# RULES
 "LAZY TEXT init -> fused" [~1] forall t.
@@ -602,14 +602,14 @@ init Empty = emptyError "init"
 unsnoc :: Text -> Maybe (Text, Char)
 unsnoc Empty          = Nothing
 unsnoc ts@(Chunk _ _) = Just (init ts, last ts)
-{-# INLINE unsnoc #-}
+{-# INLINABLE unsnoc #-}
 
 -- | /O(1)/ Tests whether a 'Text' is empty or not.  Subject to
 -- fusion.
 null :: Text -> Bool
 null Empty = True
 null _     = False
-{-# INLINE [1] null #-}
+{-# INLINABLE [1] null #-}
 
 {-# RULES
 "LAZY TEXT null -> fused" [~1] forall t.
@@ -622,7 +622,7 @@ null _     = False
 -- Subject to fusion.
 isSingleton :: Text -> Bool
 isSingleton = S.isSingleton . stream
-{-# INLINE isSingleton #-}
+{-# INLINABLE isSingleton #-}
 
 -- | /O(n\/c)/ Returns the last character of a 'Text', which must be
 -- non-empty.  Subject to fusion.
@@ -631,7 +631,7 @@ last Empty        = emptyError "last"
 last (Chunk t ts) = go t ts
     where go _ (Chunk t' ts') = go t' ts'
           go t' Empty         = T.last t'
-{-# INLINE [1] last #-}
+{-# INLINABLE [1] last #-}
 
 {-# RULES
 "LAZY TEXT last -> fused" [~1] forall t.
@@ -645,7 +645,7 @@ last (Chunk t ts) = go t ts
 length :: Text -> Int64
 length = foldlChunks go 0
     where go l t = l + fromIntegral (T.length t)
-{-# INLINE [1] length #-}
+{-# INLINABLE [1] length #-}
 
 {-# RULES
 "LAZY TEXT length -> fused" [~1] forall t.
@@ -662,7 +662,7 @@ length = foldlChunks go 0
 -- greater than the number, and hence be more efficient.
 compareLength :: Text -> Int64 -> Ordering
 compareLength t n = S.compareLengthI (stream t) n
-{-# INLINE [1] compareLength #-}
+{-# INLINABLE [1] compareLength #-}
 
 -- We don't apply those otherwise appealing length-to-compareLength
 -- rewrite rules here, because they can change the strictness
@@ -673,21 +673,21 @@ compareLength t n = S.compareLengthI (stream t) n
 -- invalid scalar values.
 map :: (Char -> Char) -> Text -> Text
 map f t = unstream (S.map (safe . f) (stream t))
-{-# INLINE [1] map #-}
+{-# INLINABLE [1] map #-}
 
 -- | /O(n)/ The 'intercalate' function takes a 'Text' and a list of
 -- 'Text's and concatenates the list after interspersing the first
 -- argument between each element of the list.
 intercalate :: Text -> [Text] -> Text
 intercalate t = concat . (F.intersperse t)
-{-# INLINE intercalate #-}
+{-# INLINABLE intercalate #-}
 
 -- | /O(n)/ The 'intersperse' function takes a character and places it
 -- between the characters of a 'Text'.  Subject to fusion.  Performs
 -- replacement on invalid scalar values.
 intersperse :: Char -> Text -> Text
 intersperse c t = unstream (S.intersperse (safe c) (stream t))
-{-# INLINE intersperse #-}
+{-# INLINABLE intersperse #-}
 
 -- | /O(n)/ Left-justify a string to the given length, using the
 -- specified fill character on the right. Subject to fusion.  Performs
@@ -702,7 +702,7 @@ justifyLeft k c t
     | len >= k  = t
     | otherwise = t `append` replicateChar (k-len) c
   where len = length t
-{-# INLINE [1] justifyLeft #-}
+{-# INLINABLE [1] justifyLeft #-}
 
 {-# RULES
 "LAZY TEXT justifyLeft -> fused" [~1] forall k c t.
@@ -724,7 +724,7 @@ justifyRight k c t
     | len >= k  = t
     | otherwise = replicateChar (k-len) c `append` t
   where len = length t
-{-# INLINE justifyRight #-}
+{-# INLINABLE justifyRight #-}
 
 -- | /O(n)/ Center a string to the given length, using the specified
 -- fill character on either side.  Performs replacement on invalid
@@ -741,7 +741,7 @@ center k c t
         d   = k - len
         r   = d `quot` 2
         l   = d - r
-{-# INLINE center #-}
+{-# INLINABLE center #-}
 
 -- | /O(n)/ The 'transpose' function transposes the rows and columns
 -- of its 'Text' argument.  Note that this function uses 'pack',
@@ -790,7 +790,7 @@ replace :: Text
         -- ^ @haystack@ in which to search.
         -> Text
 replace s d = intercalate d . splitOn s
-{-# INLINE replace #-}
+{-# INLINABLE replace #-}
 
 -- ----------------------------------------------------------------------------
 -- ** Case conversions (folds)
@@ -821,7 +821,7 @@ replace s d = intercalate d . splitOn s
 -- itself.
 toCaseFold :: Text -> Text
 toCaseFold t = unstream (S.toCaseFold (stream t))
-{-# INLINE toCaseFold #-}
+{-# INLINABLE toCaseFold #-}
 
 -- | /O(n)/ Convert a string to lower case, using simple case
 -- conversion.  Subject to fusion.
@@ -832,7 +832,7 @@ toCaseFold t = unstream (S.toCaseFold (stream t))
 -- dot above (U+0307).
 toLower :: Text -> Text
 toLower t = unstream (S.toLower (stream t))
-{-# INLINE toLower #-}
+{-# INLINABLE toLower #-}
 
 -- | /O(n)/ Convert a string to upper case, using simple case
 -- conversion.  Subject to fusion.
@@ -842,7 +842,7 @@ toLower t = unstream (S.toLower (stream t))
 -- sequence SS.
 toUpper :: Text -> Text
 toUpper t = unstream (S.toUpper (stream t))
-{-# INLINE toUpper #-}
+{-# INLINABLE toUpper #-}
 
 
 -- | /O(n)/ Convert a string to title case, using simple case
@@ -867,7 +867,7 @@ toUpper t = unstream (S.toUpper (stream t))
 -- @since 1.0.0.0
 toTitle :: Text -> Text
 toTitle t = unstream (S.toTitle (stream t))
-{-# INLINE toTitle #-}
+{-# INLINABLE toTitle #-}
 
 -- | /O(n)/ 'foldl', applied to a binary operator, a starting value
 -- (typically the left-identity of the operator), and a 'Text',
@@ -875,24 +875,24 @@ toTitle t = unstream (S.toTitle (stream t))
 -- Subject to fusion.
 foldl :: (a -> Char -> a) -> a -> Text -> a
 foldl f z t = S.foldl f z (stream t)
-{-# INLINE foldl #-}
+{-# INLINABLE foldl #-}
 
 -- | /O(n)/ A strict version of 'foldl'.
 -- Subject to fusion.
 foldl' :: (a -> Char -> a) -> a -> Text -> a
 foldl' f z t = S.foldl' f z (stream t)
-{-# INLINE foldl' #-}
+{-# INLINABLE foldl' #-}
 
 -- | /O(n)/ A variant of 'foldl' that has no starting value argument,
 -- and thus must be applied to a non-empty 'Text'.  Subject to fusion.
 foldl1 :: (Char -> Char -> Char) -> Text -> Char
 foldl1 f t = S.foldl1 f (stream t)
-{-# INLINE foldl1 #-}
+{-# INLINABLE foldl1 #-}
 
 -- | /O(n)/ A strict version of 'foldl1'.  Subject to fusion.
 foldl1' :: (Char -> Char -> Char) -> Text -> Char
 foldl1' f t = S.foldl1' f (stream t)
-{-# INLINE foldl1' #-}
+{-# INLINABLE foldl1' #-}
 
 -- | /O(n)/ 'foldr', applied to a binary operator, a starting value
 -- (typically the right-identity of the operator), and a 'Text',
@@ -900,14 +900,14 @@ foldl1' f t = S.foldl1' f (stream t)
 -- Subject to fusion.
 foldr :: (Char -> a -> a) -> a -> Text -> a
 foldr f z t = S.foldr f z (stream t)
-{-# INLINE foldr #-}
+{-# INLINABLE foldr #-}
 
 -- | /O(n)/ A variant of 'foldr' that has no starting value argument,
 -- and thus must be applied to a non-empty 'Text'.  Subject to
 -- fusion.
 foldr1 :: (Char -> Char -> Char) -> Text -> Char
 foldr1 f t = S.foldr1 f (stream t)
-{-# INLINE foldr1 #-}
+{-# INLINABLE foldr1 #-}
 
 -- | /O(n)/ Concatenate a list of 'Text's.
 concat :: [Text] -> Text
@@ -917,37 +917,37 @@ concat = to
     go (Chunk c cs) css = Chunk c (go cs css)
     to []               = Empty
     to (cs:css)         = go cs css
-{-# INLINE concat #-}
+{-# INLINABLE concat #-}
 
 -- | /O(n)/ Map a function over a 'Text' that results in a 'Text', and
 -- concatenate the results.
 concatMap :: (Char -> Text) -> Text -> Text
 concatMap f = concat . foldr ((:) . f) []
-{-# INLINE concatMap #-}
+{-# INLINABLE concatMap #-}
 
 -- | /O(n)/ 'any' @p@ @t@ determines whether any character in the
 -- 'Text' @t@ satisfies the predicate @p@. Subject to fusion.
 any :: (Char -> Bool) -> Text -> Bool
 any p t = S.any p (stream t)
-{-# INLINE any #-}
+{-# INLINABLE any #-}
 
 -- | /O(n)/ 'all' @p@ @t@ determines whether all characters in the
 -- 'Text' @t@ satisfy the predicate @p@. Subject to fusion.
 all :: (Char -> Bool) -> Text -> Bool
 all p t = S.all p (stream t)
-{-# INLINE all #-}
+{-# INLINABLE all #-}
 
 -- | /O(n)/ 'maximum' returns the maximum value from a 'Text', which
 -- must be non-empty. Subject to fusion.
 maximum :: Text -> Char
 maximum t = S.maximum (stream t)
-{-# INLINE maximum #-}
+{-# INLINABLE maximum #-}
 
 -- | /O(n)/ 'minimum' returns the minimum value from a 'Text', which
 -- must be non-empty. Subject to fusion.
 minimum :: Text -> Char
 minimum t = S.minimum (stream t)
-{-# INLINE minimum #-}
+{-# INLINABLE minimum #-}
 
 -- | /O(n)/ 'scanl' is similar to 'foldl', but returns a list of
 -- successive reduced values from the left. Subject to fusion.
@@ -961,7 +961,7 @@ minimum t = S.minimum (stream t)
 scanl :: (Char -> Char -> Char) -> Char -> Text -> Text
 scanl f z t = unstream (S.scanl g z (stream t))
     where g a b = safe (f a b)
-{-# INLINE scanl #-}
+{-# INLINABLE scanl #-}
 
 -- | /O(n)/ 'scanl1' is a variant of 'scanl' that has no starting
 -- value argument.  Performs replacement on invalid scalar values.
@@ -971,7 +971,7 @@ scanl1 :: (Char -> Char -> Char) -> Text -> Text
 scanl1 f t0 = case uncons t0 of
                 Nothing -> empty
                 Just (t,ts) -> scanl f t ts
-{-# INLINE scanl1 #-}
+{-# INLINABLE scanl1 #-}
 
 -- | /O(n)/ 'scanr' is the right-to-left dual of 'scanl'.  Performs
 -- replacement on invalid scalar values.
@@ -998,7 +998,7 @@ mapAccumL f = go
         where (z',  c')  = T.mapAccumL f z c
               (z'', cs') = go z' cs
     go z Empty           = (z, Empty)
-{-# INLINE mapAccumL #-}
+{-# INLINABLE mapAccumL #-}
 
 -- | The 'mapAccumR' function behaves like a combination of 'map' and
 -- a strict 'foldr'; it applies a function to each element of a
@@ -1012,7 +1012,7 @@ mapAccumR f = go
         where (z'', c') = T.mapAccumR f z' c
               (z', cs') = go z cs
     go z Empty          = (z, Empty)
-{-# INLINE mapAccumR #-}
+{-# INLINABLE mapAccumR #-}
 
 -- | @'repeat' x@ is an infinite 'Text', with @x@ the value of every
 -- element.
@@ -1031,7 +1031,7 @@ replicate n t
     | otherwise        = concat (rep 0)
     where rep !i | i >= n    = []
                  | otherwise = t : rep (i+1)
-{-# INLINE [1] replicate #-}
+{-# INLINABLE [1] replicate #-}
 
 -- | 'cycle' ties a finite, non-empty 'Text' into a circular one, or
 -- equivalently, the infinite repetition of the original 'Text'.
@@ -1056,7 +1056,7 @@ iterate f c = let t c' = Chunk (T.singleton c') (t (f c'))
 -- value of every element. Subject to fusion.
 replicateChar :: Int64 -> Char -> Text
 replicateChar n c = unstream (S.replicateCharI n (safe c))
-{-# INLINE replicateChar #-}
+{-# INLINABLE replicateChar #-}
 
 {-# RULES
 "LAZY TEXT replicate/singleton -> replicateChar" [~1] forall n c.
@@ -1075,7 +1075,7 @@ replicateChar n c = unstream (S.replicateCharI n (safe c))
 -- Performs replacement on invalid scalar values.
 unfoldr :: (a -> Maybe (Char,a)) -> a -> Text
 unfoldr f s = unstream (S.unfoldr (firstf safe . f) s)
-{-# INLINE unfoldr #-}
+{-# INLINABLE unfoldr #-}
 
 -- | /O(n)/ Like 'unfoldr', 'unfoldrN' builds a 'Text' from a seed
 -- value. However, the length of the result should be limited by the
@@ -1086,7 +1086,7 @@ unfoldr f s = unstream (S.unfoldr (firstf safe . f) s)
 -- Performs replacement on invalid scalar values.
 unfoldrN :: Int64 -> (a -> Maybe (Char,a)) -> a -> Text
 unfoldrN n f s = unstream (S.unfoldrN n (firstf safe . f) s)
-{-# INLINE unfoldrN #-}
+{-# INLINABLE unfoldrN #-}
 
 -- | /O(n)/ 'take' @n@, applied to a 'Text', returns the prefix of the
 -- 'Text' of length @n@, or the 'Text' itself if @n@ is greater than
@@ -1100,7 +1100,7 @@ take i t0         = take' i t0
             | n < len   = Chunk (T.take (fromIntegral n) t) Empty
             | otherwise = Chunk t (take' (n - len) ts)
             where len = fromIntegral (T.length t)
-{-# INLINE [1] take #-}
+{-# INLINABLE [1] take #-}
 
 {-# RULES
 "LAZY TEXT take -> fused" [~1] forall n t.
@@ -1140,7 +1140,7 @@ drop i t0
             | n < len   = Chunk (T.drop (fromIntegral n) t) ts
             | otherwise = drop' (n - len) ts
             where len   = fromIntegral (T.length t)
-{-# INLINE [1] drop #-}
+{-# INLINABLE [1] drop #-}
 
 {-# RULES
 "LAZY TEXT drop -> fused" [~1] forall n t.
@@ -1194,7 +1194,7 @@ takeWhile p t0 = takeWhile' t0
             Just n | n > 0     -> Chunk (T.take n t) Empty
                    | otherwise -> Empty
             Nothing            -> Chunk t (takeWhile' ts)
-{-# INLINE [1] takeWhile #-}
+{-# INLINABLE [1] takeWhile #-}
 
 {-# RULES
 "LAZY TEXT takeWhile -> fused" [~1] forall p t.
@@ -1218,7 +1218,7 @@ takeWhileEnd p = takeChunk empty . L.reverse . toChunks
                              = chunk t' acc
           | otherwise        = takeChunk (Chunk t' acc) ts
           where t' = T.takeWhileEnd p t
-{-# INLINE takeWhileEnd #-}
+{-# INLINABLE takeWhileEnd #-}
 
 -- | /O(n)/ 'dropWhile' @p@ @t@ returns the suffix remaining after
 -- 'takeWhile' @p@ @t@.  Subject to fusion.
@@ -1229,7 +1229,7 @@ dropWhile p t0 = dropWhile' t0
           case T.findIndex (not . p) t of
             Just n  -> Chunk (T.drop n t) ts
             Nothing -> dropWhile' ts
-{-# INLINE [1] dropWhile #-}
+{-# INLINABLE [1] dropWhile #-}
 
 {-# RULES
 "LAZY TEXT dropWhile -> fused" [~1] forall p t.
@@ -1255,28 +1255,28 @@ dropWhileEnd p = go
         go (Chunk t ts) = case go ts of
                             Empty -> go (Chunk t Empty)
                             ts' -> Chunk t ts'
-{-# INLINE dropWhileEnd #-}
+{-# INLINABLE dropWhileEnd #-}
 
 -- | /O(n)/ 'dropAround' @p@ @t@ returns the substring remaining after
 -- dropping characters that satisfy the predicate @p@ from both the
 -- beginning and end of @t@.
 dropAround :: (Char -> Bool) -> Text -> Text
 dropAround p = dropWhile p . dropWhileEnd p
-{-# INLINE [1] dropAround #-}
+{-# INLINABLE [1] dropAround #-}
 
 -- | /O(n)/ Remove leading white space from a string.  Equivalent to:
 --
 -- > dropWhile isSpace
 stripStart :: Text -> Text
 stripStart = dropWhile isSpace
-{-# INLINE stripStart #-}
+{-# INLINABLE stripStart #-}
 
 -- | /O(n)/ Remove trailing white space from a string.  Equivalent to:
 --
 -- > dropWhileEnd isSpace
 stripEnd :: Text -> Text
 stripEnd = dropWhileEnd isSpace
-{-# INLINE [1] stripEnd #-}
+{-# INLINABLE [1] stripEnd #-}
 
 -- | /O(n)/ Remove leading and trailing white space from a string.
 -- Equivalent to:
@@ -1284,7 +1284,7 @@ stripEnd = dropWhileEnd isSpace
 -- > dropAround isSpace
 strip :: Text -> Text
 strip = dropAround isSpace
-{-# INLINE [1] strip #-}
+{-# INLINABLE [1] strip #-}
 
 -- | /O(n)/ 'splitAt' @n t@ returns a pair whose first element is a
 -- prefix of @t@ of length @n@, and whose second is the remainder of
@@ -1354,7 +1354,7 @@ breakOn pat src
 breakOnEnd :: Text -> Text -> (Text, Text)
 breakOnEnd pat src = let (a,b) = breakOn (reverse pat) (reverse src)
                    in  (reverse b, reverse a)
-{-# INLINE breakOnEnd #-}
+{-# INLINABLE breakOnEnd #-}
 
 -- | /O(n+m)/ Find all non-overlapping instances of @needle@ in
 -- @haystack@.  Each element of the returned list consists of a pair:
@@ -1414,7 +1414,7 @@ break p t0 = break' t0
 -- ("000","AB")
 span :: (Char -> Bool) -> Text -> (Text, Text)
 span p = break (not . p)
-{-# INLINE span #-}
+{-# INLINABLE span #-}
 
 -- | The 'group' function takes a 'Text' and returns a list of 'Text's
 -- such that the concatenation of the result is equal to the argument.
@@ -1427,7 +1427,7 @@ span p = break (not . p)
 -- supply their own equality test.
 group :: Text -> [Text]
 group =  groupBy (==)
-{-# INLINE group #-}
+{-# INLINABLE group #-}
 
 -- | The 'groupBy' function is the non-overloaded version of 'group'.
 groupBy :: (Char -> Char -> Bool) -> Text -> [Text]
@@ -1497,7 +1497,7 @@ splitOn pat src
     go !i (x:xs) cs = let h :*: t = splitAtWord (x-i) cs
                       in  h : go (x+l) xs (dropWords l t)
     l = foldlChunks (\a (T.Text _ _ b) -> a + fromIntegral b) 0 pat
-{-# INLINE [1] splitOn #-}
+{-# INLINABLE [1] splitOn #-}
 
 {-# RULES
 "LAZY TEXT splitOn/singleton -> split/==" [~1] forall c t.
@@ -1518,7 +1518,7 @@ split p (Chunk t0 ts0) = comb [] (T.split p t0) ts0
         comb acc (s:[]) (Chunk t ts) = comb (s:acc) (T.split p t) ts
         comb acc (s:ss) ts           = revChunks (s:acc) : comb [] ss ts
         comb _   []     _            = impossibleError "split"
-{-# INLINE split #-}
+{-# INLINABLE split #-}
 
 -- | /O(n)/ Splits a 'Text' into components of length @k@.  The last
 -- element may be shorter than the other chunks, depending on the
@@ -1532,7 +1532,7 @@ chunksOf k = go
     go t = case splitAt k t of
              (a,b) | null a    -> []
                    | otherwise -> a : go b
-{-# INLINE chunksOf #-}
+{-# INLINABLE chunksOf #-}
 
 -- | /O(n)/ Breaks a 'Text' up into a list of 'Text's at
 -- newline 'Char's. The resulting strings do not contain newlines.
@@ -1546,18 +1546,18 @@ lines t = let (l,t') = break ((==) '\n') t
 -- representing white space.
 words :: Text -> [Text]
 words = L.filter (not . null) . split isSpace
-{-# INLINE words #-}
+{-# INLINABLE words #-}
 
 -- | /O(n)/ Joins lines, after appending a terminating newline to
 -- each.
 unlines :: [Text] -> Text
 unlines = concat . L.map (`snoc` '\n')
-{-# INLINE unlines #-}
+{-# INLINABLE unlines #-}
 
 -- | /O(n)/ Joins words using single space characters.
 unwords :: [Text] -> Text
 unwords = intercalate (singleton ' ')
-{-# INLINE unwords #-}
+{-# INLINABLE unwords #-}
 
 -- | /O(n)/ The 'isPrefixOf' function takes two 'Text's and returns
 -- 'True' iff the first is a prefix of the second.  Subject to fusion.
@@ -1572,7 +1572,7 @@ isPrefixOf (Chunk x xs) (Chunk y ys)
         (yh,yt) = T.splitAt lx y
         lx = T.length x
         ly = T.length y
-{-# INLINE [1] isPrefixOf #-}
+{-# INLINABLE [1] isPrefixOf #-}
 
 {-# RULES
 "LAZY TEXT isPrefixOf -> fused" [~1] forall s t.
@@ -1585,7 +1585,7 @@ isPrefixOf (Chunk x xs) (Chunk y ys)
 -- 'True' iff the first is a suffix of the second.
 isSuffixOf :: Text -> Text -> Bool
 isSuffixOf x y = reverse x `isPrefixOf` reverse y
-{-# INLINE isSuffixOf #-}
+{-# INLINABLE isSuffixOf #-}
 -- TODO: a better implementation
 
 -- | /O(n+m)/ The 'isInfixOf' function takes two 'Text's and returns
@@ -1602,7 +1602,7 @@ isInfixOf needle haystack
     | null needle        = True
     | isSingleton needle = S.elem (head needle) . S.stream $ haystack
     | otherwise          = not . L.null . indices needle $ haystack
-{-# INLINE [1] isInfixOf #-}
+{-# INLINABLE [1] isInfixOf #-}
 
 {-# RULES
 "LAZY TEXT isInfixOf/singleton -> S.elem/S.stream" [~1] forall n h.
@@ -1689,14 +1689,14 @@ stripSuffix p t = reverse `fmap` stripPrefix (reverse p) (reverse t)
 -- predicate.
 filter :: (Char -> Bool) -> Text -> Text
 filter p t = unstream (S.filter p (stream t))
-{-# INLINE filter #-}
+{-# INLINABLE filter #-}
 
 -- | /O(n)/ The 'find' function takes a predicate and a 'Text', and
 -- returns the first element in matching the predicate, or 'Nothing'
 -- if there is no such element. Subject to fusion.
 find :: (Char -> Bool) -> Text -> Maybe Char
 find p t = S.findBy p (stream t)
-{-# INLINE find #-}
+{-# INLINABLE find #-}
 
 -- | /O(n)/ The 'elem' function takes a character and a 'Text', and
 -- returns 'True' if the element is found in the given 'Text', or
@@ -1712,13 +1712,13 @@ elem c t = S.any (== c) (stream t)
 -- > partition p t == (filter p t, filter (not . p) t)
 partition :: (Char -> Bool) -> Text -> (Text, Text)
 partition p t = (filter p t, filter (not . p) t)
-{-# INLINE partition #-}
+{-# INLINABLE partition #-}
 
 -- | /O(n)/ 'Text' index (subscript) operator, starting from 0.
 -- Subject to fusion.
 index :: Text -> Int64 -> Char
 index t n = S.index (stream t) n
-{-# INLINE index #-}
+{-# INLINABLE index #-}
 
 -- | /O(n+m)/ The 'count' function returns the number of times the
 -- query string appears in the given 'Text'. An empty query string is
@@ -1732,7 +1732,7 @@ count pat src
     | otherwise       = go 0 (indices pat src)
   where go !n []     = n
         go !n (_:xs) = go (n+1) xs
-{-# INLINE [1] count #-}
+{-# INLINABLE [1] count #-}
 
 {-# RULES
 "LAZY TEXT count/singleton -> countChar" [~1] forall c t.
@@ -1750,7 +1750,7 @@ countChar c t = S.countChar c (stream t)
 -- equivalent to a pair of 'unpack' operations.
 zip :: Text -> Text -> [(Char,Char)]
 zip a b = S.unstreamList $ S.zipWith (,) (stream a) (stream b)
-{-# INLINE [0] zip #-}
+{-# INLINABLE [0] zip #-}
 
 -- | /O(n)/ 'zipWith' generalises 'zip' by zipping with the function
 -- given as the first argument, instead of a tupling function.
@@ -1758,7 +1758,7 @@ zip a b = S.unstreamList $ S.zipWith (,) (stream a) (stream b)
 zipWith :: (Char -> Char -> Char) -> Text -> Text -> Text
 zipWith f t1 t2 = unstream (S.zipWith g (stream t1) (stream t2))
     where g a b = safe (f a b)
-{-# INLINE [0] zipWith #-}
+{-# INLINABLE [0] zipWith #-}
 
 revChunks :: [T.Text] -> Text
 revChunks = L.foldl' (flip chunk) Empty

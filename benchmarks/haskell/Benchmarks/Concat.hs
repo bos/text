@@ -3,7 +3,7 @@
 module Benchmarks.Concat (benchmark) where
 
 import Control.Monad.Trans.Writer
-import Criterion (Benchmark, bgroup, bench, whnf)
+import Test.Tasty.Bench (Benchmark, bgroup, bench, whnf)
 import Data.Text as T
 
 benchmark :: Benchmark

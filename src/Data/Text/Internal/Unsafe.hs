@@ -33,7 +33,7 @@ import GHC.Base (realWorld#)
 -- particular, you should do no memory allocation inside an
 -- 'inlinePerformIO' block. On Hugs this is just @unsafePerformIO@.
 --
-{-# INLINE inlinePerformIO #-}
+{-# INLINABLE inlinePerformIO #-}
 inlinePerformIO :: IO a -> a
 #if defined(__GLASGOW_HASKELL__)
 inlinePerformIO (IO m) = case m realWorld# of (# _, r #) -> r
@@ -53,4 +53,4 @@ inlinePerformIO = unsafePerformIO
 inlineInterleaveST :: ST s a -> ST s a
 inlineInterleaveST (ST m) = ST $ \ s ->
     let r = case m s of (# _, res #) -> res in (# s, r #)
-{-# INLINE inlineInterleaveST #-}
+{-# INLINABLE inlineInterleaveST #-}

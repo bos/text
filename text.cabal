@@ -64,18 +64,9 @@ extra-source-files:
     -- scripts/CaseFolding.txt
     -- scripts/SpecialCasing.txt
     README.markdown
-    benchmarks/Setup.hs
-    benchmarks/cbits-bench/*.c
-    benchmarks/haskell/*.hs
-    benchmarks/haskell/Benchmarks/*.hs
-    benchmarks/haskell/Benchmarks/Programs/*.hs
-    benchmarks/python/*.py
-    benchmarks/ruby/*.rb
-    benchmarks/text-benchmarks.cabal
     changelog.md
     include/*.h
     scripts/*.hs
-    tests-and-benchmarks.markdown
     tests/literal-rule-test.sh
     tests/LiteralRuleTest.hs
 
@@ -254,3 +245,56 @@ test-suite tests
 
   default-language: Haskell2010
   default-extensions: NondecreasingIndentation
+
+benchmark text-benchmarks
+  type:           exitcode-stdio-1.0
+  ghc-options:    -Wall -O2 -rtsopts
+  build-depends:  base,
+                  binary,
+                  -- we need instance NFData ByteString
+                  bytestring >= 0.10,
+                  bytestring-lexing >= 0.5.0,
+                  containers,
+                  deepseq,
+                  filepath,
+                  stringsearch,
+                  tasty-bench >= 0.2,
+                  text,
+                  transformers,
+                  vector
+
+  if flag(bytestring-builder)
+    build-depends: bytestring         >= 0.9    && < 0.10.4,
+                   bytestring-builder >= 0.10.4
+  else
+    build-depends: bytestring         >= 0.10.4
+
+  c-sources:      benchmarks/cbits-bench/time_iconv.c
+  hs-source-dirs: benchmarks/haskell
+  main-is:        Benchmarks.hs
+  other-modules:
+    Benchmarks.Builder
+    Benchmarks.Concat
+    Benchmarks.DecodeUtf8
+    Benchmarks.EncodeUtf8
+    Benchmarks.Equality
+    Benchmarks.FileRead
+    Benchmarks.FoldLines
+    Benchmarks.Mul
+    Benchmarks.Multilang
+    Benchmarks.Programs.BigTable
+    Benchmarks.Programs.Cut
+    Benchmarks.Programs.Fold
+    Benchmarks.Programs.Sort
+    Benchmarks.Programs.StripTags
+    Benchmarks.Programs.Throughput
+    Benchmarks.Pure
+    Benchmarks.ReadNumbers
+    Benchmarks.Replace
+    Benchmarks.Search
+    Benchmarks.Stream
+    Benchmarks.WordFrequencies
+
+  default-language: Haskell2010
+  default-extensions: NondecreasingIndentation
+  other-extensions: DeriveGeneric

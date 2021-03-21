@@ -13,7 +13,7 @@ module Benchmarks.WordFrequencies
     , benchmark
     ) where
 
-import Criterion (Benchmark, bench, bgroup, whnf)
+import Test.Tasty.Bench (Benchmark, bench, bgroup, whnf)
 import Data.Char (toLower)
 import Data.List (foldl')
 import Data.Map (Map)

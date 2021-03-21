@@ -49,7 +49,7 @@ stream text = Stream next (text :*: 0) unknownSize
         | i >= len  = next (ts :*: 0)
         | otherwise = Yield c (txt :*: i+d)
         where Iter c d = iter t i
-{-# INLINE [0] stream #-}
+{-# INLINABLE [0] stream #-}
 
 -- | /O(n)/ Convert a 'Stream Char' into a 'Text', using the given
 -- chunk size.
@@ -84,18 +84,18 @@ unstreamChunks !chunkSize (Stream next s0 len0)
         finish marr len s' = do
           arr <- A.unsafeFreeze marr
           return (I.Text arr 0 len `Chunk` outer s')
-{-# INLINE [0] unstreamChunks #-}
+{-# INLINABLE [0] unstreamChunks #-}
 
 -- | /O(n)/ Convert a 'Stream Char' into a 'Text', using
 -- 'defaultChunkSize'.
 unstream :: Stream Char -> Text
 unstream = unstreamChunks defaultChunkSize
-{-# INLINE [0] unstream #-}
+{-# INLINABLE [0] unstream #-}
 
 -- | /O(n)/ Returns the number of characters in a text.
 length :: Stream Char -> Int64
 length = S.lengthI
-{-# INLINE[0] length #-}
+{-# INLINABLE[0] length #-}
 
 {-# RULES "LAZY STREAM stream/unstream fusion" forall s.
     stream (unstream s) = s #-}
@@ -106,15 +106,15 @@ length = S.lengthI
 -- 'unfoldr' when the length of the result is known.
 unfoldrN :: Int64 -> (a -> Maybe (Char,a)) -> a -> Stream Char
 unfoldrN n = S.unfoldrNI n
-{-# INLINE [0] unfoldrN #-}
+{-# INLINABLE [0] unfoldrN #-}
 
 -- | /O(n)/ stream index (subscript) operator, starting from 0.
 index :: Stream Char -> Int64 -> Char
 index = S.indexI
-{-# INLINE [0] index #-}
+{-# INLINABLE [0] index #-}
 
 -- | /O(n)/ The 'count' function returns the number of times the query
 -- element appears in the given stream.
 countChar :: Char -> Stream Char -> Int64
 countChar = S.countCharI
-{-# INLINE [0] countChar #-}
+{-# INLINABLE [0] countChar #-}

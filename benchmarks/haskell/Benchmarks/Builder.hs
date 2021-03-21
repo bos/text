@@ -9,12 +9,11 @@ module Benchmarks.Builder
     ( benchmark
     ) where
 
-import Criterion (Benchmark, bgroup, bench, nf)
+import Test.Tasty.Bench (Benchmark, bgroup, bench, nf)
 import Data.Binary.Builder as B
 import Data.ByteString.Char8 ()
 import Data.Monoid (mconcat, mempty)
-import qualified Blaze.ByteString.Builder as Blaze
-import qualified Blaze.ByteString.Builder.Char.Utf8 as Blaze
+import qualified Data.ByteString.Builder as Blaze
 import qualified Data.ByteString as SB
 import qualified Data.ByteString.Lazy as LB
 import qualified Data.Text as T
@@ -32,7 +31,7 @@ benchmark = bgroup "Builder"
           (LB.length . B.toLazyByteString . mconcat . map B.fromByteString)
           byteStrings
       , bench "Blaze" $ nf
-          (LB.length . Blaze.toLazyByteString . mconcat . map Blaze.fromString)
+          (LB.length . Blaze.toLazyByteString . mconcat . map Blaze.stringUtf8)
           strings
       ]
     , bgroup "Int"

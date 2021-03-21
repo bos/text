@@ -42,59 +42,59 @@ import GHC.Word
 class UnsafeShift a where
     shiftL :: a -> Int -> a
 #if MIN_VERSION_base(4,5,0)
-    {-# INLINE shiftL #-}
+    {-# INLINABLE shiftL #-}
     default shiftL :: Bits.Bits a => a -> Int -> a
     shiftL = Bits.unsafeShiftL
 #endif
 
     shiftR :: a -> Int -> a
 #if MIN_VERSION_base(4,5,0)
-    {-# INLINE shiftR #-}
+    {-# INLINABLE shiftR #-}
     default shiftR :: Bits.Bits a => a -> Int -> a
     shiftR = Bits.unsafeShiftR
 #endif
 
 instance UnsafeShift Word16 where
 #if !MIN_VERSION_base(4,5,0)
-    {-# INLINE shiftL #-}
+    {-# INLINABLE shiftL #-}
     shiftL (W16# x#) (I# i#) = W16# (narrow16Word# (x# `uncheckedShiftL#` i#))
 
-    {-# INLINE shiftR #-}
+    {-# INLINABLE shiftR #-}
     shiftR (W16# x#) (I# i#) = W16# (x# `uncheckedShiftRL#` i#)
 #endif
 
 instance UnsafeShift Word32 where
 #if !MIN_VERSION_base(4,5,0)
-    {-# INLINE shiftL #-}
+    {-# INLINABLE shiftL #-}
     shiftL (W32# x#) (I# i#) = W32# (narrow32Word# (x# `uncheckedShiftL#` i#))
 
-    {-# INLINE shiftR #-}
+    {-# INLINABLE shiftR #-}
     shiftR (W32# x#) (I# i#) = W32# (x# `uncheckedShiftRL#` i#)
 #endif
 
 instance UnsafeShift Word64 where
 #if !MIN_VERSION_base(4,5,0)
-    {-# INLINE shiftL #-}
+    {-# INLINABLE shiftL #-}
     shiftL (W64# x#) (I# i#) = W64# (x# `uncheckedShiftL64#` i#)
 
-    {-# INLINE shiftR #-}
+    {-# INLINABLE shiftR #-}
     shiftR (W64# x#) (I# i#) = W64# (x# `uncheckedShiftRL64#` i#)
 #endif
 
 instance UnsafeShift Int where
 #if !MIN_VERSION_base(4,5,0)
-    {-# INLINE shiftL #-}
+    {-# INLINABLE shiftL #-}
     shiftL (I# x#) (I# i#) = I# (x# `iShiftL#` i#)
 
-    {-# INLINE shiftR #-}
+    {-# INLINABLE shiftR #-}
     shiftR (I# x#) (I# i#) = I# (x# `iShiftRA#` i#)
 #endif
 
 {-
 instance UnsafeShift Integer where
-    {-# INLINE shiftL #-}
+    {-# INLINABLE shiftL #-}
     shiftL = Bits.shiftL
 
-    {-# INLINE shiftR #-}
+    {-# INLINABLE shiftR #-}
     shiftR = Bits.shiftR
 -}

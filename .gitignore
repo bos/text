@@ -11,4 +11,4 @@
 /cabal.test.project.local
 
 # Test data repo ignored. Please see instruction in tests-and-benchmarks.markdown
-/tests/text-test-data/
+/benchmarks/text-test-data/

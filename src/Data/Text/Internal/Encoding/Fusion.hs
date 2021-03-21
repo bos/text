@@ -59,14 +59,14 @@ streamASCII :: ByteString -> Stream Char
 streamASCII bs = Stream next 0 (maxSize l)
     where
       l = B.length bs
-      {-# INLINE next #-}
+      {-# INLINABLE next #-}
       next i
           | i >= l    = Done
           | otherwise = Yield (unsafeChr8 x1) (i+1)
           where
             x1 = B.unsafeIndex bs i
 {-# DEPRECATED streamASCII "Do not use this function" #-}
-{-# INLINE [0] streamASCII #-}
+{-# INLINABLE [0] streamASCII #-}
 
 -- | /O(n)/ Convert a 'ByteString' into a 'Stream Char', using UTF-8
 -- encoding.
@@ -87,7 +87,7 @@ streamUtf8 onErr bs = Stream next 0 (maxSize l)
             x3 = idx (i + 2)
             x4 = idx (i + 3)
             idx = B.unsafeIndex bs
-{-# INLINE [0] streamUtf8 #-}
+{-# INLINABLE [0] streamUtf8 #-}
 
 -- | /O(n)/ Convert a 'ByteString' into a 'Stream Char', using little
 -- endian UTF-16 encoding.
@@ -95,7 +95,7 @@ streamUtf16LE :: OnDecodeError -> ByteString -> Stream Char
 streamUtf16LE onErr bs = Stream next 0 (maxSize (l `shiftR` 1))
     where
       l = B.length bs
-      {-# INLINE next #-}
+      {-# INLINABLE next #-}
       next i
           | i >= l                         = Done
           | i+1 < l && U16.validate1 x1    = Yield (unsafeChr x1) (i+2)
@@ -105,7 +105,7 @@ streamUtf16LE onErr bs = Stream next 0 (maxSize (l `shiftR` 1))
             x1    = idx i       + (idx (i + 1) `shiftL` 8)
             x2    = idx (i + 2) + (idx (i + 3) `shiftL` 8)
             idx = fromIntegral . B.unsafeIndex bs :: Int -> Word16
-{-# INLINE [0] streamUtf16LE #-}
+{-# INLINABLE [0] streamUtf16LE #-}
 
 -- | /O(n)/ Convert a 'ByteString' into a 'Stream Char', using big
 -- endian UTF-16 encoding.
@@ -113,7 +113,7 @@ streamUtf16BE :: OnDecodeError -> ByteString -> Stream Char
 streamUtf16BE onErr bs = Stream next 0 (maxSize (l `shiftR` 1))
     where
       l = B.length bs
-      {-# INLINE next #-}
+      {-# INLINABLE next #-}
       next i
           | i >= l                         = Done
           | i+1 < l && U16.validate1 x1    = Yield (unsafeChr x1) (i+2)
@@ -123,7 +123,7 @@ streamUtf16BE onErr bs = Stream next 0 (maxSize (l `shiftR` 1))
             x1    = (idx i `shiftL` 8)       + idx (i + 1)
             x2    = (idx (i + 2) `shiftL` 8) + idx (i + 3)
             idx = fromIntegral . B.unsafeIndex bs :: Int -> Word16
-{-# INLINE [0] streamUtf16BE #-}
+{-# INLINABLE [0] streamUtf16BE #-}
 
 -- | /O(n)/ Convert a 'ByteString' into a 'Stream Char', using big
 -- endian UTF-32 encoding.
@@ -131,7 +131,7 @@ streamUtf32BE :: OnDecodeError -> ByteString -> Stream Char
 streamUtf32BE onErr bs = Stream next 0 (maxSize (l `shiftR` 2))
     where
       l = B.length bs
-      {-# INLINE next #-}
+      {-# INLINABLE next #-}
       next i
           | i >= l                    = Done
           | i+3 < l && U32.validate x = Yield (unsafeChr32 x) (i+4)
@@ -143,7 +143,7 @@ streamUtf32BE onErr bs = Stream next 0 (maxSize (l `shiftR` 2))
             x3    = idx (i+2)
             x4    = idx (i+3)
             idx = fromIntegral . B.unsafeIndex bs :: Int -> Word32
-{-# INLINE [0] streamUtf32BE #-}
+{-# INLINABLE [0] streamUtf32BE #-}
 
 -- | /O(n)/ Convert a 'ByteString' into a 'Stream Char', using little
 -- endian UTF-32 encoding.
@@ -151,7 +151,7 @@ streamUtf32LE :: OnDecodeError -> ByteString -> Stream Char
 streamUtf32LE onErr bs = Stream next 0 (maxSize (l `shiftR` 2))
     where
       l = B.length bs
-      {-# INLINE next #-}
+      {-# INLINABLE next #-}
       next i
           | i >= l                    = Done
           | i+3 < l && U32.validate x = Yield (unsafeChr32 x) (i+4)
@@ -163,7 +163,7 @@ streamUtf32LE onErr bs = Stream next 0 (maxSize (l `shiftR` 2))
             x3    = idx $ i+2
             x4    = idx $ i+3
             idx = fromIntegral . B.unsafeIndex bs :: Int -> Word32
-{-# INLINE [0] streamUtf32LE #-}
+{-# INLINABLE [0] streamUtf32LE #-}
 
 -- | /O(n)/ Convert a 'Stream' 'Word8' to a 'ByteString'.
 unstream :: Stream Word8 -> ByteString

@@ -9,7 +9,7 @@ module Benchmarks.Search
     , benchmark
     ) where
 
-import Criterion (Benchmark, bench, bgroup, whnf)
+import Test.Tasty.Bench (Benchmark, bench, bgroup, whnf)
 import qualified Data.ByteString as B
 import qualified Data.ByteString.Lazy as BL
 import qualified Data.ByteString.Lazy.Search as BL

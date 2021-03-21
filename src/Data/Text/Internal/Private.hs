@@ -28,10 +28,10 @@ span_ p t@(Text arr off len) = (# hd,tl #)
         loop !i | i < len && p c = loop (i+d)
                 | otherwise      = i
             where Iter c d       = iter t i
-{-# INLINE span_ #-}
+{-# INLINABLE span_ #-}
 
 runText :: (forall s. (A.MArray s -> Int -> ST s Text) -> ST s Text) -> Text
 runText act = runST (act $ \ !marr !len -> do
                              arr <- A.unsafeFreeze marr
                              return $! text arr 0 len)
-{-# INLINE runText #-}
+{-# INLINABLE runText #-}

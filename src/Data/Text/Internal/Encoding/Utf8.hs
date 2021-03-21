@@ -58,7 +58,7 @@ between :: Word8                -- ^ byte to check
         -> Word8                -- ^ upper bound
         -> Bool
 between x y z = x >= y && x <= z
-{-# INLINE between #-}
+{-# INLINABLE between #-}
 
 ord2 :: Char -> (Word8,Word8)
 ord2 c =
@@ -103,7 +103,7 @@ chr2 (W8# x1#) (W8# x2#) = C# (chr# (z1# +# z2#))
       !y2# = word2Int# (word8ToWord# x2#)
       !z1# = uncheckedIShiftL# (y1# -# 0xC0#) 6#
       !z2# = y2# -# 0x80#
-{-# INLINE chr2 #-}
+{-# INLINABLE chr2 #-}
 
 chr3 :: Word8 -> Word8 -> Word8 -> Char
 chr3 (W8# x1#) (W8# x2#) (W8# x3#) = C# (chr# (z1# +# z2# +# z3#))
@@ -114,7 +114,7 @@ chr3 (W8# x1#) (W8# x2#) (W8# x3#) = C# (chr# (z1# +# z2# +# z3#))
       !z1# = uncheckedIShiftL# (y1# -# 0xE0#) 12#
       !z2# = uncheckedIShiftL# (y2# -# 0x80#) 6#
       !z3# = y3# -# 0x80#
-{-# INLINE chr3 #-}
+{-# INLINABLE chr3 #-}
 
 chr4             :: Word8 -> Word8 -> Word8 -> Word8 -> Char
 chr4 (W8# x1#) (W8# x2#) (W8# x3#) (W8# x4#) =
@@ -128,18 +128,18 @@ chr4 (W8# x1#) (W8# x2#) (W8# x3#) (W8# x4#) =
       !z2# = uncheckedIShiftL# (y2# -# 0x80#) 12#
       !z3# = uncheckedIShiftL# (y3# -# 0x80#) 6#
       !z4# = y4# -# 0x80#
-{-# INLINE chr4 #-}
+{-# INLINABLE chr4 #-}
 
 validate1 :: Word8 -> Bool
 validate1 x1 = x1 <= 0x7F
-{-# INLINE validate1 #-}
+{-# INLINABLE validate1 #-}
 
 validate2 :: Word8 -> Word8 -> Bool
 validate2 x1 x2 = between x1 0xC2 0xDF && between x2 0x80 0xBF
-{-# INLINE validate2 #-}
+{-# INLINABLE validate2 #-}
 
 validate3 :: Word8 -> Word8 -> Word8 -> Bool
-{-# INLINE validate3 #-}
+{-# INLINABLE validate3 #-}
 validate3 x1 x2 x3 = validate3_1 || validate3_2 || validate3_3 || validate3_4
   where
     validate3_1 = (x1 == 0xE0) &&
@@ -156,7 +156,7 @@ validate3 x1 x2 x3 = validate3_1 || validate3_2 || validate3_3 || validate3_4
                   between x3 0x80 0xBF
 
 validate4 :: Word8 -> Word8 -> Word8 -> Word8 -> Bool
-{-# INLINE validate4 #-}
+{-# INLINABLE validate4 #-}
 validate4 x1 x2 x3 x4 = validate4_1 || validate4_2 || validate4_3
   where
     validate4_1 = x1 == 0xF0 &&

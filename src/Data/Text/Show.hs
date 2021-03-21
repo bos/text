@@ -40,7 +40,7 @@ instance Show Text where
 -- | /O(n)/ Convert a 'Text' into a 'String'.  Subject to fusion.
 unpack :: Text -> String
 unpack = S.unstreamList . stream
-{-# INLINE [1] unpack #-}
+{-# INLINABLE [1] unpack #-}
 
 -- | /O(n)/ Convert a literal string into a 'Text'.
 --
@@ -71,7 +71,7 @@ unpackCString# addr# = unstream (S.streamCString# addr#)
 -- Performs replacement on invalid scalar values.
 singleton :: Char -> Text
 singleton = unstream . S.singleton . safe
-{-# INLINE [1] singleton #-}
+{-# INLINABLE [1] singleton #-}
 
 {-# RULES "TEXT singleton" forall a.
     unstream (S.singleton (safe a))

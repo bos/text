@@ -95,24 +95,24 @@ newtype Builder = Builder {
 #if MIN_VERSION_base(4,9,0)
 instance Semigroup Builder where
    (<>) = append
-   {-# INLINE (<>) #-}
+   {-# INLINABLE (<>) #-}
 #endif
 
 instance Monoid Builder where
    mempty  = empty
-   {-# INLINE mempty #-}
+   {-# INLINABLE mempty #-}
 #if MIN_VERSION_base(4,9,0)
    mappend = (<>) -- future-proof definition
 #else
    mappend = append
 #endif
-   {-# INLINE mappend #-}
+   {-# INLINABLE mappend #-}
    mconcat = foldr mappend Data.Monoid.mempty
-   {-# INLINE mconcat #-}
+   {-# INLINABLE mconcat #-}
 
 instance String.IsString Builder where
     fromString = fromString
-    {-# INLINE fromString #-}
+    {-# INLINABLE fromString #-}
 
 instance Show Builder where
     show = show . toLazyText
@@ -131,7 +131,7 @@ instance Ord Builder where
 --
 empty :: Builder
 empty = Builder (\ k buf -> k buf)
-{-# INLINE empty #-}
+{-# INLINABLE empty #-}
 
 -- | /O(1)./ A @Builder@ taking a single character, satisfying
 --
@@ -139,7 +139,7 @@ empty = Builder (\ k buf -> k buf)
 --
 singleton :: Char -> Builder
 singleton c = writeAtMost 2 $ \ marr o -> unsafeWrite marr o c
-{-# INLINE singleton #-}
+{-# INLINABLE singleton #-}
 
 ------------------------------------------------------------------------
 
@@ -150,7 +150,7 @@ singleton c = writeAtMost 2 $ \ marr o -> unsafeWrite marr o c
 --
 append :: Builder -> Builder -> Builder
 append (Builder f) (Builder g) = Builder (f . g)
-{-# INLINE [0] append #-}
+{-# INLINABLE [0] append #-}
 
 -- TODO: Experiment to find the right threshold.
 copyLimit :: Int
@@ -168,7 +168,7 @@ fromText t@(Text arr off l)
     | S.null t       = empty
     | l <= copyLimit = writeN l $ \marr o -> A.copyI marr o arr off (l+o)
     | otherwise      = flush `append` mapBuilder (t :)
-{-# INLINE [1] fromText #-}
+{-# INLINABLE [1] fromText #-}
 
 {-# RULES
 "fromText/pack" forall s .
@@ -195,7 +195,7 @@ fromString str = Builder $ \k (Buffer p0 o0 u0 l0) ->
     in loop p0 o0 u0 l0 str
   where
     chunkSize = smallChunkSize
-{-# INLINE fromString #-}
+{-# INLINABLE fromString #-}
 
 -- | /O(1)./ A @Builder@ taking a lazy @Text@, satisfying
 --
@@ -203,7 +203,7 @@ fromString str = Builder $ \k (Buffer p0 o0 u0 l0) ->
 --
 fromLazyText :: L.Text -> Builder
 fromLazyText ts = flush `append` mapBuilder (L.toChunks ts ++)
-{-# INLINE fromLazyText #-}
+{-# INLINABLE fromLazyText #-}
 
 ------------------------------------------------------------------------
 
@@ -242,7 +242,7 @@ flush = Builder $ \ k buf@(Buffer p o u l) ->
                 !t = Text arr o u
             ts <- inlineInterleaveST (k b)
             return $! t : ts
-{-# INLINE [1] flush #-}
+{-# INLINABLE [1] flush #-}
 -- defer inlining so that flush/flush rule may fire.
 
 ------------------------------------------------------------------------
@@ -250,13 +250,13 @@ flush = Builder $ \ k buf@(Buffer p o u l) ->
 -- | Sequence an ST operation on the buffer
 withBuffer :: (forall s. Buffer s -> ST s (Buffer s)) -> Builder
 withBuffer f = Builder $ \k buf -> f buf >>= k
-{-# INLINE withBuffer #-}
+{-# INLINABLE withBuffer #-}
 
 -- | Get the size of the buffer
 withSize :: (Int -> Builder) -> Builder
 withSize f = Builder $ \ k buf@(Buffer _ _ _ l) ->
     runBuilder (f l) k buf
-{-# INLINE withSize #-}
+{-# INLINABLE withSize #-}
 
 -- | Map the resulting list of texts.
 mapBuilder :: ([S.Text] -> [S.Text]) -> Builder
@@ -270,29 +270,29 @@ ensureFree !n = withSize $ \ l ->
     if n <= l
     then empty
     else flush `append'` withBuffer (const (newBuffer (max n smallChunkSize)))
-{-# INLINE [0] ensureFree #-}
+{-# INLINABLE [0] ensureFree #-}
 
 writeAtMost :: Int -> (forall s. A.MArray s -> Int -> ST s Int) -> Builder
 writeAtMost n f = ensureFree n `append'` withBuffer (writeBuffer f)
-{-# INLINE [0] writeAtMost #-}
+{-# INLINABLE [0] writeAtMost #-}
 
 -- | Ensure that @n@ many elements are available, and then use @f@ to
 -- write some elements into the memory.
 writeN :: Int -> (forall s. A.MArray s -> Int -> ST s ()) -> Builder
 writeN n f = writeAtMost n (\ p o -> f p o >> return n)
-{-# INLINE writeN #-}
+{-# INLINABLE writeN #-}
 
 writeBuffer :: (A.MArray s -> Int -> ST s Int) -> Buffer s -> ST s (Buffer s)
 writeBuffer f (Buffer p o u l) = do
     n <- f p (o+u)
     return $! Buffer p o (u+n) (l-n)
-{-# INLINE writeBuffer #-}
+{-# INLINABLE writeBuffer #-}
 
 newBuffer :: Int -> ST s (Buffer s)
 newBuffer size = do
     arr <- A.new size
     return $! Buffer arr 0 0 size
-{-# INLINE newBuffer #-}
+{-# INLINABLE newBuffer #-}
 
 ------------------------------------------------------------------------
 -- Some nice rules for Builder
@@ -302,7 +302,7 @@ newBuffer size = do
 -- This is not needed with GHC 7+.
 append' :: Builder -> Builder -> Builder
 append' (Builder f) (Builder g) = Builder (f . g)
-{-# INLINE append' #-}
+{-# INLINABLE append' #-}
 
 {-# RULES
 

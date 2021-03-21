@@ -79,13 +79,13 @@ showStructure (Chunk t ts)    =
 
 -- | Smart constructor for 'Chunk'. Guarantees the data type invariant.
 chunk :: T.Text -> Text -> Text
-{-# INLINE chunk #-}
+{-# INLINABLE chunk #-}
 chunk t@(T.Text _ _ len) ts | len == 0 = ts
                             | otherwise = Chunk t ts
 
 -- | Smart constructor for 'Empty'.
 empty :: Text
-{-# INLINE [0] empty #-}
+{-# INLINABLE [0] empty #-}
 empty = Empty
 
 -- | Consume the chunks of a lazy 'Text' with a natural right fold.
@@ -93,7 +93,7 @@ foldrChunks :: (T.Text -> a -> a) -> a -> Text -> a
 foldrChunks f z = go
   where go Empty        = z
         go (Chunk c cs) = f c (go cs)
-{-# INLINE foldrChunks #-}
+{-# INLINABLE foldrChunks #-}
 
 -- | Consume the chunks of a lazy 'Text' with a strict, tail-recursive,
 -- accumulating left fold.
@@ -101,19 +101,19 @@ foldlChunks :: (a -> T.Text -> a) -> a -> Text -> a
 foldlChunks f z = go z
   where go !a Empty        = a
         go !a (Chunk c cs) = go (f a c) cs
-{-# INLINE foldlChunks #-}
+{-# INLINABLE foldlChunks #-}
 
 -- | Currently set to 16 KiB, less the memory management overhead.
 defaultChunkSize :: Int
 defaultChunkSize = 16384 - chunkOverhead
-{-# INLINE defaultChunkSize #-}
+{-# INLINABLE defaultChunkSize #-}
 
 -- | Currently set to 128 bytes, less the memory management overhead.
 smallChunkSize :: Int
 smallChunkSize = 128 - chunkOverhead
-{-# INLINE smallChunkSize #-}
+{-# INLINABLE smallChunkSize #-}
 
 -- | The memory management overhead. Currently this is tuned for GHC only.
 chunkOverhead :: Int
 chunkOverhead = sizeOf (undefined :: Int) `shiftL` 1
-{-# INLINE chunkOverhead #-}
+{-# INLINABLE chunkOverhead #-}

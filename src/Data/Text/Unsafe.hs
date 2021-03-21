@@ -44,7 +44,7 @@ unsafeHead (Text arr off _len)
     | otherwise                = chr2 m n
     where m = A.unsafeIndex arr off
           n = A.unsafeIndex arr (off+1)
-{-# INLINE unsafeHead #-}
+{-# INLINABLE unsafeHead #-}
 
 -- | /O(1)/ A variant of 'tail' for non-empty 'Text'. 'unsafeTail'
 -- omits the check for the empty case, so there is an obligation on
@@ -56,7 +56,7 @@ unsafeTail t@(Text arr off len) =
 #endif
     Text arr (off+d) (len-d)
   where d = iter_ t 0
-{-# INLINE unsafeTail #-}
+{-# INLINABLE unsafeTail #-}
 
 data Iter = Iter {-# UNPACK #-} !Char {-# UNPACK #-} !Int
 
@@ -71,7 +71,7 @@ iter (Text arr off _len) i
         n = A.unsafeIndex arr k
         j = off + i
         k = j + 1
-{-# INLINE iter #-}
+{-# INLINABLE iter #-}
 
 -- | /O(1)/ Iterate one step through a UTF-16 array, returning the
 -- delta to add to give the next offset to iterate at.
@@ -79,7 +79,7 @@ iter_ :: Text -> Int -> Int
 iter_ (Text arr off _len) i | m < 0xD800 || m > 0xDBFF = 1
                             | otherwise                = 2
   where m = A.unsafeIndex arr (off+i)
-{-# INLINE iter_ #-}
+{-# INLINABLE iter_ #-}
 
 -- | /O(1)/ Iterate one step backwards through a UTF-16 array,
 -- returning the current character and the delta to add (i.e. a
@@ -92,7 +92,7 @@ reverseIter (Text arr off _len) i
         n = A.unsafeIndex arr k
         j = off + i
         k = j - 1
-{-# INLINE reverseIter #-}
+{-# INLINABLE reverseIter #-}
 
 -- | /O(1)/ Iterate one step backwards through a UTF-16 array,
 -- returning the delta to add (i.e. a negative number) to give the
@@ -104,21 +104,21 @@ reverseIter_ (Text arr off _len) i
     | m < 0xDC00 || m > 0xDFFF = -1
     | otherwise                = -2
   where m = A.unsafeIndex arr (off+i)
-{-# INLINE reverseIter_ #-}
+{-# INLINABLE reverseIter_ #-}
 
 -- | /O(1)/ Return the length of a 'Text' in units of 'Word16'.  This
 -- is useful for sizing a target array appropriately before using
 -- 'unsafeCopyToPtr'.
 lengthWord16 :: Text -> Int
 lengthWord16 (Text _arr _off len) = len
-{-# INLINE lengthWord16 #-}
+{-# INLINABLE lengthWord16 #-}
 
 -- | /O(1)/ Unchecked take of 'k' 'Word16's from the front of a 'Text'.
 takeWord16 :: Int -> Text -> Text
 takeWord16 k (Text arr off _len) = Text arr off k
-{-# INLINE takeWord16 #-}
+{-# INLINABLE takeWord16 #-}
 
 -- | /O(1)/ Unchecked drop of 'k' 'Word16's from the front of a 'Text'.
 dropWord16 :: Int -> Text -> Text
 dropWord16 k (Text arr off len) = Text arr (off+k) (len-k)
-{-# INLINE dropWord16 #-}
+{-# INLINABLE dropWord16 #-}

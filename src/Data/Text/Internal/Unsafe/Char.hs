@@ -39,19 +39,19 @@ import Data.Text.Internal.PrimCompat ( word8ToWord#, word16ToWord#, word32ToWord
 
 ord :: Char -> Int
 ord (C# c#) = I# (ord# c#)
-{-# INLINE ord #-}
+{-# INLINABLE ord #-}
 
 unsafeChr :: Word16 -> Char
 unsafeChr (W16# w#) = C# (chr# (word2Int# (word16ToWord# w#)))
-{-# INLINE unsafeChr #-}
+{-# INLINABLE unsafeChr #-}
 
 unsafeChr8 :: Word8 -> Char
 unsafeChr8 (W8# w#) = C# (chr# (word2Int# (word8ToWord# w#)))
-{-# INLINE unsafeChr8 #-}
+{-# INLINABLE unsafeChr8 #-}
 
 unsafeChr32 :: Word32 -> Char
 unsafeChr32 (W32# w#) = C# (chr# (word2Int# (word32ToWord# w#)))
-{-# INLINE unsafeChr32 #-}
+{-# INLINABLE unsafeChr32 #-}
 
 -- | Write a character into the array at the given offset.  Returns
 -- the number of 'Word16's written.
@@ -74,7 +74,7 @@ unsafeWrite marr i c
           m = n - 0x10000
           lo = fromIntegral $ (m `shiftR` 10) + 0xD800
           hi = fromIntegral $ (m .&. 0x3FF) + 0xDC00
-{-# INLINE unsafeWrite #-}
+{-# INLINABLE unsafeWrite #-}
 
 {-
 unsafeWriteRev :: A.MArray s Word16 -> Int -> Char -> ST s Int
@@ -92,5 +92,5 @@ unsafeWriteRev marr i c
           m = n - 0x10000
           lo = fromIntegral $ (m `shiftR` 10) + 0xD800
           hi = fromIntegral $ (m .&. 0x3FF) + 0xDC00
-{-# INLINE unsafeWriteRev #-}
+{-# INLINABLE unsafeWriteRev #-}
 -}

@@ -10,16 +10,14 @@ module Benchmarks.FoldLines
     ( benchmark
     ) where
 
-import Criterion (Benchmark, bgroup, bench, whnfIO)
+import Test.Tasty.Bench (Benchmark, bgroup, bench, whnfIO)
 import System.IO
-import qualified Data.ByteString as B
 import qualified Data.Text as T
 import qualified Data.Text.IO as T
 
 benchmark :: FilePath -> Benchmark
 benchmark fp = bgroup "ReadLines"
     [ bench "Text"       $ withHandle $ foldLinesT (\n _ -> n + 1) (0 :: Int)
-    , bench "ByteString" $ withHandle $ foldLinesB (\n _ -> n + 1) (0 :: Int)
     ]
   where
     withHandle f = whnfIO $ do
@@ -42,17 +40,3 @@ foldLinesT f z0 h = go z0
                 l <- T.hGetLine h
                 let z' = f z l in go z'
 {-# INLINE foldLinesT #-}
-
--- | ByteString line fold
---
-foldLinesB :: (a -> B.ByteString -> a) -> a -> Handle -> IO a
-foldLinesB f z0 h = go z0
-  where
-    go !z = do
-        eof <- hIsEOF h
-        if eof
-            then return z
-            else do
-                l <- B.hGetLine h
-                let z' = f z l in go z'
-{-# INLINE foldLinesB #-}

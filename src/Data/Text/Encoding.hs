@@ -203,7 +203,7 @@ decodeUtf8With onErr bs = withBS bs aux
   -- replacement-character codepaths. There's multiple ways to address
   -- this with different tradeoffs; but ideally we should optimise for
   -- the optimistic/error-free case.
-{- INLINE[0] decodeUtf8With #-}
+{- INLINABLE[0] decodeUtf8With #-}
 
 -- $stream
 --
@@ -351,7 +351,7 @@ streamDecodeUtf8With onErr = decodeChunk B.empty 0 0
 -- 'decodeUtf8With'.
 decodeUtf8 :: ByteString -> Text
 decodeUtf8 = decodeUtf8With strictDecode
-{-# INLINE[0] decodeUtf8 #-}
+{-# INLINABLE[0] decodeUtf8 #-}
 {-# RULES "STREAM stream/decodeUtf8 fusion" [1]
     forall bs. F.stream (decodeUtf8 bs) = E.streamUtf8 strictDecode bs #-}
 
@@ -361,7 +361,7 @@ decodeUtf8 = decodeUtf8With strictDecode
 -- exception will be returned, otherwise the decoded text.
 decodeUtf8' :: ByteString -> Either UnicodeException Text
 decodeUtf8' = unsafeDupablePerformIO . try . evaluate . decodeUtf8With strictDecode
-{-# INLINE decodeUtf8' #-}
+{-# INLINABLE decodeUtf8' #-}
 
 -- | Encode text to a ByteString 'B.Builder' using UTF-8 encoding.
 --
@@ -376,7 +376,7 @@ encodeUtf8Builder = encodeUtf8BuilderEscaped (BP.liftFixedToBounded BP.word8)
 -- like JSON or HTML.
 --
 -- @since 1.1.0.0
-{-# INLINE encodeUtf8BuilderEscaped #-}
+{-# INLINABLE encodeUtf8BuilderEscaped #-}
 -- TODO: Extend documentation with references to source code in @blaze-html@
 -- or @aeson@ that uses this function.
 encodeUtf8BuilderEscaped :: BP.BoundedPrim Word8 -> Text -> B.Builder
@@ -450,7 +450,7 @@ encodeUtf8 (Text arr off len)
 -- | Decode text from little endian UTF-16 encoding.
 decodeUtf16LEWith :: OnDecodeError -> ByteString -> Text
 decodeUtf16LEWith onErr bs = F.unstream (E.streamUtf16LE onErr bs)
-{-# INLINE decodeUtf16LEWith #-}
+{-# INLINABLE decodeUtf16LEWith #-}
 
 -- | Decode text from little endian UTF-16 encoding.
 --
@@ -459,12 +459,12 @@ decodeUtf16LEWith onErr bs = F.unstream (E.streamUtf16LE onErr bs)
 -- invalid data, use 'decodeUtf16LEWith'.
 decodeUtf16LE :: ByteString -> Text
 decodeUtf16LE = decodeUtf16LEWith strictDecode
-{-# INLINE decodeUtf16LE #-}
+{-# INLINABLE decodeUtf16LE #-}
 
 -- | Decode text from big endian UTF-16 encoding.
 decodeUtf16BEWith :: OnDecodeError -> ByteString -> Text
 decodeUtf16BEWith onErr bs = F.unstream (E.streamUtf16BE onErr bs)
-{-# INLINE decodeUtf16BEWith #-}
+{-# INLINABLE decodeUtf16BEWith #-}
 
 -- | Decode text from big endian UTF-16 encoding.
 --
@@ -473,22 +473,22 @@ decodeUtf16BEWith onErr bs = F.unstream (E.streamUtf16BE onErr bs)
 -- invalid data, use 'decodeUtf16BEWith'.
 decodeUtf16BE :: ByteString -> Text
 decodeUtf16BE = decodeUtf16BEWith strictDecode
-{-# INLINE decodeUtf16BE #-}
+{-# INLINABLE decodeUtf16BE #-}
 
 -- | Encode text using little endian UTF-16 encoding.
 encodeUtf16LE :: Text -> ByteString
 encodeUtf16LE txt = E.unstream (E.restreamUtf16LE (F.stream txt))
-{-# INLINE encodeUtf16LE #-}
+{-# INLINABLE encodeUtf16LE #-}
 
 -- | Encode text using big endian UTF-16 encoding.
 encodeUtf16BE :: Text -> ByteString
 encodeUtf16BE txt = E.unstream (E.restreamUtf16BE (F.stream txt))
-{-# INLINE encodeUtf16BE #-}
+{-# INLINABLE encodeUtf16BE #-}
 
 -- | Decode text from little endian UTF-32 encoding.
 decodeUtf32LEWith :: OnDecodeError -> ByteString -> Text
 decodeUtf32LEWith onErr bs = F.unstream (E.streamUtf32LE onErr bs)
-{-# INLINE decodeUtf32LEWith #-}
+{-# INLINABLE decodeUtf32LEWith #-}
 
 -- | Decode text from little endian UTF-32 encoding.
 --
@@ -497,12 +497,12 @@ decodeUtf32LEWith onErr bs = F.unstream (E.streamUtf32LE onErr bs)
 -- invalid data, use 'decodeUtf32LEWith'.
 decodeUtf32LE :: ByteString -> Text
 decodeUtf32LE = decodeUtf32LEWith strictDecode
-{-# INLINE decodeUtf32LE #-}
+{-# INLINABLE decodeUtf32LE #-}
 
 -- | Decode text from big endian UTF-32 encoding.
 decodeUtf32BEWith :: OnDecodeError -> ByteString -> Text
 decodeUtf32BEWith onErr bs = F.unstream (E.streamUtf32BE onErr bs)
-{-# INLINE decodeUtf32BEWith #-}
+{-# INLINABLE decodeUtf32BEWith #-}
 
 -- | Decode text from big endian UTF-32 encoding.
 --
@@ -511,17 +511,17 @@ decodeUtf32BEWith onErr bs = F.unstream (E.streamUtf32BE onErr bs)
 -- invalid data, use 'decodeUtf32BEWith'.
 decodeUtf32BE :: ByteString -> Text
 decodeUtf32BE = decodeUtf32BEWith strictDecode
-{-# INLINE decodeUtf32BE #-}
+{-# INLINABLE decodeUtf32BE #-}
 
 -- | Encode text using little endian UTF-32 encoding.
 encodeUtf32LE :: Text -> ByteString
 encodeUtf32LE txt = E.unstream (E.restreamUtf32LE (F.stream txt))
-{-# INLINE encodeUtf32LE #-}
+{-# INLINABLE encodeUtf32LE #-}
 
 -- | Encode text using big endian UTF-32 encoding.
 encodeUtf32BE :: Text -> ByteString
 encodeUtf32BE txt = E.unstream (E.restreamUtf32BE (F.stream txt))
-{-# INLINE encodeUtf32BE #-}
+{-# INLINABLE encodeUtf32BE #-}
 
 foreign import ccall unsafe "_hs_text_decode_utf8" c_decode_utf8
     :: MutableByteArray# s -> Ptr CSize

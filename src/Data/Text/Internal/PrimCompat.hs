@@ -29,9 +29,9 @@ word32ToWord# w = w
 wordToWord8#  w = w
 wordToWord16# w = w
 wordToWord32# w = w
-{-# INLINE wordToWord16# #-}
-{-# INLINE word16ToWord# #-}
-{-# INLINE wordToWord32# #-}
-{-# INLINE word32ToWord# #-}
+{-# INLINABLE wordToWord16# #-}
+{-# INLINABLE word16ToWord# #-}
+{-# INLINABLE wordToWord32# #-}
+{-# INLINABLE word32ToWord# #-}
 
 #endif

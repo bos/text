@@ -18,8 +18,8 @@ module Benchmarks.Programs.Throughput
     ( benchmark
     ) where
 
-import Criterion (Benchmark, bgroup, bench, whnfIO)
-import System.IO (Handle, hPutStr)
+import Test.Tasty.Bench (Benchmark, bgroup, bench, whnfIO)
+import System.IO (Handle)
 import qualified Data.ByteString as B
 import qualified Data.ByteString.Lazy as BL
 import qualified Data.Text.Encoding as T
@@ -29,10 +29,7 @@ import qualified Data.Text.Lazy.IO as TL
 
 benchmark :: FilePath -> Handle -> Benchmark
 benchmark fp sink = bgroup "Throughput"
-    [ bench "String" $ whnfIO $ readFile fp >>= hPutStr sink
-    , bench "ByteString" $ whnfIO $ B.readFile fp >>= B.hPutStr sink
-    , bench "LazyByteString" $ whnfIO $ BL.readFile fp >>= BL.hPutStr sink
-    , bench "Text" $ whnfIO $ T.readFile fp >>= T.hPutStr sink
+    [ bench "Text" $ whnfIO $ T.readFile fp >>= T.hPutStr sink
     , bench "LazyText" $ whnfIO $ TL.readFile fp >>= TL.hPutStr sink
     , bench "TextByteString" $ whnfIO $
         B.readFile fp >>= B.hPutStr sink . T.encodeUtf8 .  T.decodeUtf8

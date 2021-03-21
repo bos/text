@@ -51,7 +51,7 @@ data Size = Between {-# UNPACK #-} !Int {-# UNPACK #-} !Int -- ^ Lower and upper
 exactly :: Size -> Maybe Int
 exactly (Between na nb) | na == nb = Just na
 exactly _ = Nothing
-{-# INLINE exactly #-}
+{-# INLINABLE exactly #-}
 
 -- | The 'Size' of the given code point.
 charSize :: Char -> Size
@@ -66,7 +66,7 @@ codePointsSize n =
     assert (n >= 0)
 #endif
     Between n (2*n)
-{-# INLINE codePointsSize #-}
+{-# INLINABLE codePointsSize #-}
 
 exactSize :: Int -> Size
 exactSize n =
@@ -74,7 +74,7 @@ exactSize n =
     assert (n >= 0)
 #endif
     Between n n
-{-# INLINE exactSize #-}
+{-# INLINABLE exactSize #-}
 
 maxSize :: Int -> Size
 maxSize n =
@@ -82,7 +82,7 @@ maxSize n =
     assert (n >= 0)
 #endif
     Between 0 n
-{-# INLINE maxSize #-}
+{-# INLINABLE maxSize #-}
 
 betweenSize :: Int -> Int -> Size
 betweenSize m n =
@@ -91,7 +91,7 @@ betweenSize m n =
     assert (n >= m)
 #endif
     Between m n
-{-# INLINE betweenSize #-}
+{-# INLINABLE betweenSize #-}
 
 unionSize :: Size -> Size -> Size
 unionSize (Between a b) (Between c d) = Between (min a c) (max b d)
@@ -99,7 +99,7 @@ unionSize _ _ = Unknown
 
 unknownSize :: Size
 unknownSize = Unknown
-{-# INLINE unknownSize #-}
+{-# INLINABLE unknownSize #-}
 
 instance Num Size where
     (+) = addSize
@@ -107,30 +107,30 @@ instance Num Size where
     (*) = mulSize
 
     fromInteger = f where f = exactSize . fromInteger
-                          {-# INLINE f #-}
+                          {-# INLINABLE f #-}
 
 add :: Int -> Int -> Int
 add m n | mn >=   0 = mn
         | otherwise = overflowError
   where mn = m + n
-{-# INLINE add #-}
+{-# INLINABLE add #-}
 
 addSize :: Size -> Size -> Size
 addSize (Between ma mb) (Between na nb) = Between (add ma na) (add mb nb)
 addSize _               _               = Unknown
-{-# INLINE addSize #-}
+{-# INLINABLE addSize #-}
 
 subtractSize :: Size -> Size -> Size
 subtractSize (Between ma mb) (Between na nb) = Between (max (ma-nb) 0) (max (mb-na) 0)
 subtractSize a@(Between 0 _) Unknown         = a
 subtractSize (Between _ mb)  Unknown         = Between 0 mb
 subtractSize _               _               = Unknown
-{-# INLINE subtractSize #-}
+{-# INLINABLE subtractSize #-}
 
 mulSize :: Size -> Size -> Size
 mulSize (Between ma mb) (Between na nb) = Between (mul ma na) (mul mb nb)
 mulSize _               _               = Unknown
-{-# INLINE mulSize #-}
+{-# INLINABLE mulSize #-}
 
 -- | Minimum of two size hints.
 smaller :: Size -> Size -> Size
@@ -143,7 +143,7 @@ smaller (Between _ mb)  Unknown         = Between 0 mb
 smaller Unknown         b@(Between 0 _) = b
 smaller Unknown         (Between _ nb)  = Between 0 nb
 smaller Unknown         Unknown         = Unknown
-{-# INLINE smaller #-}
+{-# INLINABLE smaller #-}
 
 -- | Maximum of two size hints.
 larger :: Size -> Size -> Size
@@ -152,19 +152,19 @@ larger a@(Between ma mb) b@(Between na nb)
     | na >= mb  = b
     | otherwise = Between (ma `max` na) (mb `max` nb)
 larger _ _ = Unknown
-{-# INLINE larger #-}
+{-# INLINABLE larger #-}
 
 -- | Compute the maximum size from a size hint, if possible.
 upperBound :: Int -> Size -> Int
 upperBound _ (Between _ n) = n
 upperBound k _             = k
-{-# INLINE upperBound #-}
+{-# INLINABLE upperBound #-}
 
 -- | Compute the maximum size from a size hint, if possible.
 lowerBound :: Int -> Size -> Int
 lowerBound _ (Between n _) = n
 lowerBound k _             = k
-{-# INLINE lowerBound #-}
+{-# INLINABLE lowerBound #-}
 
 -- | Determine the ordering relationship between two 'Size's, or 'Nothing' in
 -- the indeterminate case.
@@ -181,7 +181,7 @@ compareSize _ _        = Nothing
 isEmpty :: Size -> Bool
 isEmpty (Between _ n) = n <= 0
 isEmpty _             = False
-{-# INLINE isEmpty #-}
+{-# INLINABLE isEmpty #-}
 
 overflowError :: Int
 overflowError = error "Data.Text.Internal.Fusion.Size: size overflow"

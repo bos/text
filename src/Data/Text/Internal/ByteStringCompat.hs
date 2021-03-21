@@ -23,7 +23,7 @@ mkBS dfp n = BS dfp n
 #else
 mkBS dfp n = PS dfp 0 n
 #endif
-{-# INLINE mkBS #-}
+{-# INLINABLE mkBS #-}
 
 withBS :: ByteString -> (ForeignPtr Word8 -> Int -> r) -> r
 #if MIN_VERSION_bytestring(0,11,0)
@@ -31,7 +31,7 @@ withBS (BS !sfp !slen)       kont = kont sfp slen
 #else
 withBS (PS !sfp !soff !slen) kont = kont (plusForeignPtr sfp soff) slen
 #endif
-{-# INLINE withBS #-}
+{-# INLINABLE withBS #-}
 
 #if !MIN_VERSION_bytestring(0,11,0)
 #if !MIN_VERSION_base(4,10,0)
@@ -46,7 +46,7 @@ withBS (PS !sfp !soff !slen) kont = kont (plusForeignPtr sfp soff) slen
 -- not happened, *not* the new address.
 plusForeignPtr :: ForeignPtr a -> Int -> ForeignPtr b
 plusForeignPtr (ForeignPtr addr guts) (I# offset) = ForeignPtr (plusAddr# addr offset) guts
-{-# INLINE [0] plusForeignPtr #-}
+{-# INLINABLE [0] plusForeignPtr #-}
 {-# RULES
 "ByteString plusForeignPtr/0" forall fp .
    plusForeignPtr fp 0 = fp

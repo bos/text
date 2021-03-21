@@ -14,12 +14,9 @@ Master [git repository](https://github.com/haskell/text):
 
 * `git clone git://github.com/haskell/text.git`
 
-There's also a [Mercurial mirror](https://bitbucket.org/bos/text):
-
-* `hg clone https://bitbucket.org/bos/text`
-
-(You can create and contribute changes using either Mercurial or git.)
-
+To run benchmarks please clone and unpack
+[test files](https://github.com/bos/text-test-data)
+into `benchmarks/text-test-data`.
 
 # Authors
 

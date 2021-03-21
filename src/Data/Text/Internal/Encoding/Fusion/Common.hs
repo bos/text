@@ -57,8 +57,8 @@ restreamUtf16BE (Stream next0 s0 len) = Stream next (RS0 s0) (len * 2)
     next (RS1 s x2)       = Yield x2 (RS0 s)
     next (RS2 s x2 x3)    = Yield x2 (RS1 s x3)
     next (RS3 s x2 x3 x4) = Yield x2 (RS2 s x3 x4)
-    {-# INLINE next #-}
-{-# INLINE restreamUtf16BE #-}
+    {-# INLINABLE next #-}
+{-# INLINABLE restreamUtf16BE #-}
 
 restreamUtf16LE :: Stream Char -> Stream Word8
 restreamUtf16LE (Stream next0 s0 len) = Stream next (RS0 s0) (len * 2)
@@ -81,8 +81,8 @@ restreamUtf16LE (Stream next0 s0 len) = Stream next (RS0 s0) (len * 2)
     next (RS1 s x2)       = Yield x2 (RS0 s)
     next (RS2 s x2 x3)    = Yield x2 (RS1 s x3)
     next (RS3 s x2 x3 x4) = Yield x2 (RS2 s x3 x4)
-    {-# INLINE next #-}
-{-# INLINE restreamUtf16LE #-}
+    {-# INLINABLE next #-}
+{-# INLINABLE restreamUtf16LE #-}
 
 restreamUtf32BE :: Stream Char -> Stream Word8
 restreamUtf32BE (Stream next0 s0 len) = Stream next (RS0 s0) (len * 2)
@@ -100,8 +100,8 @@ restreamUtf32BE (Stream next0 s0 len) = Stream next (RS0 s0) (len * 2)
     next (RS1 s x2)       = Yield x2 (RS0 s)
     next (RS2 s x2 x3)    = Yield x2 (RS1 s x3)
     next (RS3 s x2 x3 x4) = Yield x2 (RS2 s x3 x4)
-    {-# INLINE next #-}
-{-# INLINE restreamUtf32BE #-}
+    {-# INLINABLE next #-}
+{-# INLINABLE restreamUtf32BE #-}
 
 restreamUtf32LE :: Stream Char -> Stream Word8
 restreamUtf32LE (Stream next0 s0 len) = Stream next (RS0 s0) (len * 2)
@@ -119,5 +119,5 @@ restreamUtf32LE (Stream next0 s0 len) = Stream next (RS0 s0) (len * 2)
     next (RS1 s x2)       = Yield x2 (RS0 s)
     next (RS2 s x2 x3)    = Yield x2 (RS1 s x3)
     next (RS3 s x2 x3 x4) = Yield x2 (RS2 s x3 x4)
-    {-# INLINE next #-}
-{-# INLINE restreamUtf32LE #-}
+    {-# INLINABLE next #-}
+{-# INLINABLE restreamUtf32LE #-}
