@@ -41,6 +41,7 @@ module Data.Text.Internal.Builder
      Builder
    , toLazyText
    , toLazyTextWith
+   , toText
 
      -- ** Constructing Builders
    , singleton
@@ -232,6 +233,10 @@ toLazyText = toLazyTextWith smallChunkSize
 toLazyTextWith :: Int -> Builder -> L.Text
 toLazyTextWith chunkSize m = L.fromChunks (runST $
   newBuffer chunkSize >>= runBuilder (m `append` flush) (const (return [])))
+
+-- | /O(n)./ Extract a strict @Text@ from a @Builder@.
+toText :: Builder -> Text
+toText = L.toStrict . toLazyText
 
 -- | /O(1)./ Pop the strict @Text@ we have constructed so far, if any,
 -- yielding a new chunk in the result lazy @Text@.

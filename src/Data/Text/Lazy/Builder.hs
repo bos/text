@@ -41,6 +41,7 @@ module Data.Text.Lazy.Builder
      Builder
    , toLazyText
    , toLazyTextWith
+   , toText
 
      -- * Constructing Builders
    , singleton
