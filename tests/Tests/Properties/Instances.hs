@@ -1,6 +1,6 @@
 -- | Test instances
 
-{-# LANGUAGE CPP #-}
+{-# LANGUAGE ViewPatterns #-}
 {-# OPTIONS_GHC -fno-warn-missing-signatures #-}
 module Tests.Properties.Instances
     ( testInstances
@@ -11,7 +11,6 @@ import Test.QuickCheck
 import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.QuickCheck (testProperty)
 import Tests.QuickCheckUtils
-import Text.Show.Functions ()
 import qualified Data.List as L
 import qualified Data.Text as T
 import qualified Data.Text.Internal.Fusion.Common as S
@@ -19,14 +18,14 @@ import qualified Data.Text.Lazy as TL
 
 s_Eq s            = (s==)    `eq` ((S.streamList s==) . S.streamList)
     where _types = s :: String
-sf_Eq p s =
+sf_Eq (applyFun -> p) s =
     ((L.filter p s==) . L.filter p) `eq`
     (((S.filter p $ S.streamList s)==) . S.filter p . S.streamList)
 t_Eq s            = (s==)    `eq` ((T.pack s==) . T.pack)
 tl_Eq s           = (s==)    `eq` ((TL.pack s==) . TL.pack)
 s_Ord s           = (compare s) `eq` (compare (S.streamList s) . S.streamList)
     where _types = s :: String
-sf_Ord p s =
+sf_Ord (applyFun -> p) s =
     ((compare $ L.filter p s) . L.filter p) `eq`
     (compare (S.filter p $ S.streamList s) . S.filter p . S.streamList)
 t_Ord s           = (compare s) `eq` (compare (T.pack s) . T.pack)

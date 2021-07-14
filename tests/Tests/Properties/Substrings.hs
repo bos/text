@@ -1,5 +1,7 @@
 -- | Tests for substring functions (@take@, @split@, @isInfixOf@, etc.)
 
+{-# LANGUAGE ViewPatterns #-}
+
 {-# OPTIONS_GHC -fno-warn-missing-signatures #-}
 module Tests.Properties.Substrings
     ( testSubstrings
@@ -10,7 +12,6 @@ import Test.QuickCheck
 import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.QuickCheck (testProperty)
 import Tests.QuickCheckUtils
-import Text.Show.Functions ()
 import qualified Data.List as L
 import qualified Data.Text as T
 import qualified Data.Text.Internal.Fusion as S
@@ -20,9 +21,9 @@ import qualified Data.Text.Lazy as TL
 import qualified Tests.SlowFunctions as Slow
 
 s_take n          = L.take n      `eqP` (unpackS . S.take n)
-s_take_s m        = L.take n      `eqP` (unpackS . S.unstream . S.take n)
-  where n = small m
-sf_take p n       = (L.take n . L.filter p) `eqP`
+s_take_s (Small n) = L.take n      `eqP` (unpackS . S.unstream . S.take n)
+sf_take (applyFun -> p) n
+                  = (L.take n . L.filter p) `eqP`
                     (unpackS . S.take n . S.filter p)
 t_take n          = L.take n      `eqP` (unpackS . T.take n)
 t_takeEnd n       = (L.reverse . L.take n . L.reverse) `eqP`
@@ -31,25 +32,24 @@ tl_take n         = L.take n      `eqP` (unpackS . TL.take (fromIntegral n))
 tl_takeEnd n      = (L.reverse . L.take (fromIntegral n) . L.reverse) `eqP`
                     (unpackS . TL.takeEnd n)
 s_drop n          = L.drop n      `eqP` (unpackS . S.drop n)
-s_drop_s m        = L.drop n      `eqP` (unpackS . S.unstream . S.drop n)
-  where n = small m
-sf_drop p n       = (L.drop n . L.filter p) `eqP`
-                    (unpackS . S.drop n . S.filter p)
+s_drop_s (Small n) = L.drop n      `eqP` (unpackS . S.unstream . S.drop n)
+sf_drop (applyFun -> p) n
+                  = (L.drop n . L.filter p) `eqP` (unpackS . S.drop n . S.filter p)
 t_drop n          = L.drop n      `eqP` (unpackS . T.drop n)
 t_dropEnd n       = (L.reverse . L.drop n . L.reverse) `eqP`
                     (unpackS . T.dropEnd n)
 tl_drop n         = L.drop n      `eqP` (unpackS . TL.drop (fromIntegral n))
 tl_dropEnd n      = (L.reverse . L.drop n . L.reverse) `eqP`
                     (unpackS . TL.dropEnd (fromIntegral n))
-s_take_drop m     = (L.take n . L.drop n) `eqP` (unpackS . S.take n . S.drop n)
-  where n = small m
-s_take_drop_s m   = (L.take n . L.drop n) `eqP`
+s_take_drop (Small n) = (L.take n . L.drop n) `eqP` (unpackS . S.take n . S.drop n)
+s_take_drop_s (Small n) = (L.take n . L.drop n) `eqP`
                     (unpackS . S.unstream . S.take n . S.drop n)
-  where n = small m
-s_takeWhile p     = L.takeWhile p `eqP` (unpackS . S.takeWhile p)
-s_takeWhile_s p   = L.takeWhile p `eqP` (unpackS . S.unstream . S.takeWhile p)
-sf_takeWhile q p  = (L.takeWhile p . L.filter q) `eqP`
-                    (unpackS . S.takeWhile p . S.filter q)
+s_takeWhile (applyFun -> p)
+                  = L.takeWhile p `eqP` (unpackS . S.takeWhile p)
+s_takeWhile_s (applyFun -> p)
+                  = L.takeWhile p `eqP` (unpackS . S.unstream . S.takeWhile p)
+sf_takeWhile (applyFun -> q) (applyFun -> p)
+                  = (L.takeWhile p . L.filter q) `eqP` (unpackS . S.takeWhile p . S.filter q)
 
 data NoMatch = NoMatch Char Char
   deriving (Eq, Show)
@@ -62,29 +62,42 @@ instance Arbitrary NoMatch where
   shrink (NoMatch c d) = fmap (NoMatch c)   (filter (/= c) (shrink d))
                       ++ fmap (`NoMatch` d) (filter (/= d) (shrink c))
 
-t_takeWhile p     = L.takeWhile p `eqP` (unpackS . T.takeWhile p)
-tl_takeWhile p    = L.takeWhile p `eqP` (unpackS . TL.takeWhile p)
-t_takeWhileEnd p  = (L.reverse . L.takeWhile p . L.reverse) `eqP`
+t_takeWhile (applyFun -> p)
+                  = L.takeWhile p `eqP` (unpackS . T.takeWhile p)
+tl_takeWhile (applyFun -> p)
+                  = L.takeWhile p `eqP` (unpackS . TL.takeWhile p)
+t_takeWhileEnd (applyFun -> p)
+                  = (L.reverse . L.takeWhile p . L.reverse) `eqP`
                     (unpackS . T.takeWhileEnd p)
-t_takeWhileEnd_null t (NoMatch c d) = T.null $
-                    T.takeWhileEnd (==d) (T.snoc t c)
-tl_takeWhileEnd p = (L.reverse . L.takeWhile p . L.reverse) `eqP`
+t_takeWhileEnd_null t (NoMatch c d)
+                  = T.null $ T.takeWhileEnd (==d) (T.snoc t c)
+tl_takeWhileEnd (applyFun -> p)
+                  = (L.reverse . L.takeWhile p . L.reverse) `eqP`
                     (unpackS . TL.takeWhileEnd p)
-tl_takeWhileEnd_null t (NoMatch c d) = TL.null $
-                    TL.takeWhileEnd (==d) (TL.snoc t c)
-s_dropWhile p     = L.dropWhile p `eqP` (unpackS . S.dropWhile p)
-s_dropWhile_s p   = L.dropWhile p `eqP` (unpackS . S.unstream . S.dropWhile p)
-sf_dropWhile q p  = (L.dropWhile p . L.filter q) `eqP`
+tl_takeWhileEnd_null t (NoMatch c d)
+                  = TL.null $ TL.takeWhileEnd (==d) (TL.snoc t c)
+s_dropWhile (applyFun -> p)
+                  = L.dropWhile p `eqP` (unpackS . S.dropWhile p)
+s_dropWhile_s (applyFun -> p)
+                  = L.dropWhile p `eqP` (unpackS . S.unstream . S.dropWhile p)
+sf_dropWhile (applyFun -> q) (applyFun -> p)
+                  = (L.dropWhile p . L.filter q) `eqP`
                     (unpackS . S.dropWhile p . S.filter q)
-t_dropWhile p     = L.dropWhile p `eqP` (unpackS . T.dropWhile p)
-tl_dropWhile p    = L.dropWhile p `eqP` (unpackS . S.dropWhile p)
-t_dropWhileEnd p  = (L.reverse . L.dropWhile p . L.reverse) `eqP`
+t_dropWhile (applyFun -> p)
+                  = L.dropWhile p `eqP` (unpackS . T.dropWhile p)
+tl_dropWhile (applyFun -> p)
+                  = L.dropWhile p `eqP` (unpackS . S.dropWhile p)
+t_dropWhileEnd (applyFun -> p)
+                  = (L.reverse . L.dropWhile p . L.reverse) `eqP`
                     (unpackS . T.dropWhileEnd p)
-tl_dropWhileEnd p = (L.reverse . L.dropWhile p . L.reverse) `eqP`
+tl_dropWhileEnd (applyFun -> p)
+                  = (L.reverse . L.dropWhile p . L.reverse) `eqP`
                     (unpackS . TL.dropWhileEnd p)
-t_dropAround p    = (L.dropWhile p . L.reverse . L.dropWhile p . L.reverse)
+t_dropAround (applyFun -> p)
+                  = (L.dropWhile p . L.reverse . L.dropWhile p . L.reverse)
                     `eqP` (unpackS . T.dropAround p)
-tl_dropAround p   = (L.dropWhile p . L.reverse . L.dropWhile p . L.reverse)
+tl_dropAround (applyFun -> p)
+                  = (L.dropWhile p . L.reverse . L.dropWhile p . L.reverse)
                     `eqP` (unpackS . TL.dropAround p)
 t_stripStart      = T.dropWhile isSpace `eq` T.stripStart
 tl_stripStart     = TL.dropWhile isSpace `eq` TL.stripStart
@@ -94,8 +107,8 @@ t_strip           = T.dropAround isSpace `eq` T.strip
 tl_strip          = TL.dropAround isSpace `eq` TL.strip
 t_splitAt n       = L.splitAt n   `eqP` (unpack2 . T.splitAt n)
 tl_splitAt n      = L.splitAt n   `eqP` (unpack2 . TL.splitAt (fromIntegral n))
-t_span p        = L.span p      `eqP` (unpack2 . T.span p)
-tl_span p       = L.span p      `eqP` (unpack2 . TL.span p)
+t_span (applyFun -> p)  = L.span p `eqP` (unpack2 . T.span p)
+tl_span (applyFun -> p) = L.span p `eqP` (unpack2 . TL.span p)
 
 t_breakOn_id s      = squid `eq` (uncurry T.append . T.breakOn s)
   where squid t | T.null s  = error "empty"
@@ -115,12 +128,16 @@ t_breakOnEnd_end (NotEmpty s) t =
 tl_breakOnEnd_end (NotEmpty s) t =
     let (m,k) = TL.breakOnEnd s t
     in k `TL.isSuffixOf` t && (TL.null m || s `TL.isSuffixOf` m)
-t_break p       = L.break p     `eqP` (unpack2 . T.break p)
-tl_break p      = L.break p     `eqP` (unpack2 . TL.break p)
+t_break (applyFun -> p)
+                  = L.break p     `eqP` (unpack2 . T.break p)
+tl_break (applyFun -> p)
+                  = L.break p     `eqP` (unpack2 . TL.break p)
 t_group           = L.group       `eqP` (map unpackS . T.group)
 tl_group          = L.group       `eqP` (map unpackS . TL.group)
-t_groupBy p       = L.groupBy p   `eqP` (map unpackS . T.groupBy p)
-tl_groupBy p      = L.groupBy p   `eqP` (map unpackS . TL.groupBy p)
+t_groupBy (applyFun2 -> p)
+                  = L.groupBy p   `eqP` (map unpackS . T.groupBy p)
+tl_groupBy (applyFun2 -> p)
+                  = L.groupBy p   `eqP` (map unpackS . TL.groupBy p)
 t_inits           = L.inits       `eqP` (map unpackS . T.inits)
 tl_inits          = L.inits       `eqP` (map unpackS . TL.inits)
 t_tails           = L.tails       `eqP` (map unpackS . T.tails)
@@ -145,11 +162,11 @@ tl_splitOn_split s = ((TL.splitOn (TL.fromStrict s) . TL.fromStrict) `eq`
 t_splitOn_i (NotEmpty t)  = id `eq` (T.intercalate t . T.splitOn t)
 tl_splitOn_i (NotEmpty t) = id `eq` (TL.intercalate t . TL.splitOn t)
 
-t_split p       = split p `eqP` (map unpackS . T.split p)
+t_split (applyFun -> p) = split p `eqP` (map unpackS . T.split p)
 t_split_count c = (L.length . T.split (==c)) `eq`
                   ((1+) . T.count (T.singleton c))
 t_split_splitOn c = T.split (==c) `eq` T.splitOn (T.singleton c)
-tl_split p      = split p `eqP` (map unpackS . TL.split p)
+tl_split (applyFun -> p) = split p `eqP` (map unpackS . TL.split p)
 
 split :: (a -> Bool) -> [a] -> [[a]]
 split _ [] =  [[]]
@@ -185,7 +202,8 @@ tl_unwords        = (L.unwords . unSqrt) `eq` (unpackS . TL.unwords . map packS 
 
 s_isPrefixOf s    = L.isPrefixOf s `eqP`
                     (S.isPrefixOf (S.stream $ packS s) . S.stream)
-sf_isPrefixOf p s = (L.isPrefixOf s . L.filter p) `eqP`
+sf_isPrefixOf (applyFun -> p) s
+                  = (L.isPrefixOf s . L.filter p) `eqP`
                     (S.isPrefixOf (S.stream $ packS s) . S.filter p . S.stream)
 t_isPrefixOf s    = L.isPrefixOf s`eqP` T.isPrefixOf (packS s)
 tl_isPrefixOf s   = L.isPrefixOf s`eqP` TL.isPrefixOf (packS s)

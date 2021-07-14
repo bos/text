@@ -48,8 +48,7 @@ t_mul a b = mulRef a b === eval mul a b
 
 t_dropWord16 m t = dropWord16 m t `T.isSuffixOf` t
 t_takeWord16 m t = takeWord16 m t `T.isPrefixOf` t
-t_take_drop_16 m t = T.append (takeWord16 n t) (dropWord16 n t) === t
-  where n = small m
+t_take_drop_16 (Small n) t = T.append (takeWord16 n t) (dropWord16 n t) === t
 t_use_from t = ioProperty $ (==t) <$> useAsPtr t fromPtr
 
 t_copy t = T.copy t === t
@@ -65,10 +64,10 @@ t_copy t = T.copy t === t
 t_write_read = write_read T.unlines T.filter T.hPutStr T.hGetContents
 tl_write_read = write_read TL.unlines TL.filter TL.hPutStr TL.hGetContents
 
-t_write_read_line e m b t = write_read head T.filter T.hPutStrLn
-                            T.hGetLine e m b [t]
-tl_write_read_line e m b t = write_read head TL.filter TL.hPutStrLn
-                             TL.hGetLine e m b [t]
+t_write_read_line m b t = write_read head T.filter T.hPutStrLn
+                            T.hGetLine m b [t]
+tl_write_read_line m b t = write_read head TL.filter TL.hPutStrLn
+                             TL.hGetLine m b [t]
 
 
 testLowLevel :: TestTree

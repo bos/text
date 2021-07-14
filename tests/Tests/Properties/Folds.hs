@@ -1,5 +1,7 @@
 -- | Test folds, scans, and unfolds
 
+{-# LANGUAGE ViewPatterns #-}
+
 {-# OPTIONS_GHC -fno-warn-missing-signatures #-}
 module Tests.Properties.Folds
     ( testFolds
@@ -8,9 +10,8 @@ module Tests.Properties.Folds
 import Control.Arrow (second)
 import Data.Word (Word8, Word16)
 import Test.Tasty (TestTree, testGroup)
-import Test.Tasty.QuickCheck (testProperty, Small(..), (===))
+import Test.Tasty.QuickCheck (testProperty, Small(..), (===), applyFun, applyFun2)
 import Tests.QuickCheckUtils
-import Text.Show.Functions ()
 import qualified Data.List as L
 import qualified Data.Text as T
 import qualified Data.Text.Internal.Fusion as S
@@ -19,79 +20,103 @@ import qualified Data.Text.Lazy as TL
 
 -- Folds
 
-sf_foldl p f z    = (L.foldl f z . L.filter p) `eqP` (S.foldl f z . S.filter p)
+sf_foldl (applyFun -> p) (applyFun2 -> f) z =
+    (L.foldl f z . L.filter p) `eqP` (S.foldl f z . S.filter p)
     where _types  = f :: Char -> Char -> Char
-t_foldl f z       = L.foldl f z  `eqP` (T.foldl f z)
+t_foldl (applyFun2 -> f) z       = L.foldl f z  `eqP` (T.foldl f z)
     where _types  = f :: Char -> Char -> Char
-tl_foldl f z      = L.foldl f z  `eqP` (TL.foldl f z)
+tl_foldl (applyFun2 -> f) z      = L.foldl f z  `eqP` (TL.foldl f z)
     where _types  = f :: Char -> Char -> Char
-sf_foldl' p f z   = (L.foldl' f z . L.filter p) `eqP`
-                    (S.foldl' f z . S.filter p)
+sf_foldl' (applyFun -> p) (applyFun2 -> f) z =
+    (L.foldl' f z . L.filter p) `eqP` (S.foldl' f z . S.filter p)
     where _types  = f :: Char -> Char -> Char
-t_foldl' f z      = L.foldl' f z `eqP` T.foldl' f z
+t_foldl' (applyFun2 -> f) z      = L.foldl' f z `eqP` T.foldl' f z
     where _types  = f :: Char -> Char -> Char
-tl_foldl' f z     = L.foldl' f z `eqP` TL.foldl' f z
+tl_foldl' (applyFun2 -> f) z     = L.foldl' f z `eqP` TL.foldl' f z
     where _types  = f :: Char -> Char -> Char
-sf_foldl1 p f     = (L.foldl1 f . L.filter p) `eqP` (S.foldl1 f . S.filter p)
-t_foldl1 f        = L.foldl1 f   `eqP` T.foldl1 f
-tl_foldl1 f       = L.foldl1 f   `eqP` TL.foldl1 f
-sf_foldl1' p f    = (L.foldl1' f . L.filter p) `eqP` (S.foldl1' f . S.filter p)
-t_foldl1' f       = L.foldl1' f  `eqP` T.foldl1' f
-tl_foldl1' f      = L.foldl1' f  `eqP` TL.foldl1' f
-sf_foldr p f z    = (L.foldr f z . L.filter p) `eqP` (S.foldr f z . S.filter p)
+sf_foldl1 (applyFun -> p) (applyFun2 -> f) =
+    (L.foldl1 f . L.filter p) `eqP` (S.foldl1 f . S.filter p)
+t_foldl1 (applyFun2 -> f)        = L.foldl1 f   `eqP` T.foldl1 f
+tl_foldl1 (applyFun2 -> f)       = L.foldl1 f   `eqP` TL.foldl1 f
+sf_foldl1' (applyFun -> p) (applyFun2 -> f) =
+    (L.foldl1' f . L.filter p) `eqP` (S.foldl1' f . S.filter p)
+t_foldl1' (applyFun2 -> f)       = L.foldl1' f  `eqP` T.foldl1' f
+tl_foldl1' (applyFun2 -> f)      = L.foldl1' f  `eqP` TL.foldl1' f
+sf_foldr (applyFun -> p) (applyFun2 -> f) z =
+    (L.foldr f z . L.filter p) `eqP` (S.foldr f z . S.filter p)
     where _types  = f :: Char -> Char -> Char
-t_foldr f z       = L.foldr f z  `eqP` T.foldr f z
+t_foldr (applyFun2 -> f) z       = L.foldr f z  `eqP` T.foldr f z
     where _types  = f :: Char -> Char -> Char
-tl_foldr f z      = L.foldr f z  `eqPSqrt` TL.foldr f z
+tl_foldr (applyFun2 -> f) z      = L.foldr f z  `eqPSqrt` TL.foldr f z
     where _types  = f :: Char -> Char -> Char
-sf_foldr1 p f     = (L.foldr1 f . L.filter p) `eqPSqrt` (S.foldr1 f . S.filter p)
-t_foldr1 f        = L.foldr1 f   `eqP` T.foldr1 f
-tl_foldr1 f       = L.foldr1 f   `eqPSqrt` TL.foldr1 f
+sf_foldr1 (applyFun -> p) (applyFun2 -> f) =
+    (L.foldr1 f . L.filter p) `eqPSqrt` (S.foldr1 f . S.filter p)
+t_foldr1 (applyFun2 -> f)        = L.foldr1 f   `eqP` T.foldr1 f
+tl_foldr1 (applyFun2 -> f)       = L.foldr1 f   `eqPSqrt` TL.foldr1 f
 
 -- Special folds
 
 s_concat_s        = (L.concat . unSqrt) `eq` (unpackS . S.unstream . S.concat . map packS . unSqrt)
-sf_concat p       = (L.concat . map (L.filter p) . unSqrt) `eq`
+sf_concat (applyFun -> p)
+                  = (L.concat . map (L.filter p) . unSqrt) `eq`
                     (unpackS . S.concat . map (S.filter p . packS) . unSqrt)
 t_concat          = (L.concat . unSqrt) `eq` (unpackS . T.concat . map packS . unSqrt)
 tl_concat         = (L.concat . unSqrt) `eq` (unpackS . TL.concat . map TL.pack . unSqrt)
-sf_concatMap p f  = (L.concatMap f . L.filter p) `eqPSqrt`
-                    (unpackS . S.concatMap (packS . f) . S.filter p)
-t_concatMap f     = L.concatMap f `eqPSqrt` (unpackS . T.concatMap (packS . f))
-tl_concatMap f    = L.concatMap f `eqPSqrt` (unpackS . TL.concatMap (TL.pack . f))
-sf_any q p        = (L.any p . L.filter q) `eqP` (S.any p . S.filter q)
-t_any p           = L.any p       `eqP` T.any p
-tl_any p          = L.any p       `eqP` TL.any p
-sf_all q p        = (L.all p . L.filter q) `eqP` (S.all p . S.filter q)
-t_all p           = L.all p       `eqP` T.all p
-tl_all p          = L.all p       `eqP` TL.all p
-sf_maximum p      = (L.maximum . L.filter p) `eqP` (S.maximum . S.filter p)
+sf_concatMap (applyFun -> p) (applyFun -> f) =
+    (L.concatMap f . L.filter p) `eqPSqrt` (unpackS . S.concatMap (packS . f) . S.filter p)
+t_concatMap (applyFun -> f)
+                  = L.concatMap f `eqPSqrt` (unpackS . T.concatMap (packS . f))
+tl_concatMap (applyFun -> f)
+                  = L.concatMap f `eqPSqrt` (unpackS . TL.concatMap (TL.pack . f))
+sf_any (applyFun -> q) (applyFun -> p)
+                  = (L.any p . L.filter q) `eqP` (S.any p . S.filter q)
+t_any (applyFun -> p)
+                  = L.any p       `eqP` T.any p
+tl_any (applyFun -> p)
+                  = L.any p       `eqP` TL.any p
+sf_all (applyFun -> q) (applyFun -> p)
+                  = (L.all p . L.filter q) `eqP` (S.all p . S.filter q)
+t_all (applyFun -> p)
+                  = L.all p       `eqP` T.all p
+tl_all (applyFun -> p)
+                  = L.all p       `eqP` TL.all p
+sf_maximum (applyFun -> p)
+                  = (L.maximum . L.filter p) `eqP` (S.maximum . S.filter p)
 t_maximum         = L.maximum     `eqP` T.maximum
 tl_maximum        = L.maximum     `eqP` TL.maximum
-sf_minimum p      = (L.minimum . L.filter p) `eqP` (S.minimum . S.filter p)
+sf_minimum (applyFun -> p)
+                  = (L.minimum . L.filter p) `eqP` (S.minimum . S.filter p)
 t_minimum         = L.minimum     `eqP` T.minimum
 tl_minimum        = L.minimum     `eqP` TL.minimum
 
 -- Scans
 
-sf_scanl p f z    = (L.scanl f z . L.filter p) `eqP`
-                    (unpackS . S.scanl f z . S.filter p)
-t_scanl f z       = L.scanl f z   `eqP` (unpackS . T.scanl f z)
-tl_scanl f z      = L.scanl f z   `eqP` (unpackS . TL.scanl f z)
-t_scanl1 f        = L.scanl1 f    `eqP` (unpackS . T.scanl1 f)
-tl_scanl1 f       = L.scanl1 f    `eqP` (unpackS . TL.scanl1 f)
-t_scanr f z       = L.scanr f z   `eqP` (unpackS . T.scanr f z)
-tl_scanr f z      = L.scanr f z   `eqP` (unpackS . TL.scanr f z)
-t_scanr1 f        = L.scanr1 f    `eqP` (unpackS . T.scanr1 f)
-tl_scanr1 f       = L.scanr1 f    `eqP` (unpackS . TL.scanr1 f)
+sf_scanl (applyFun -> p) (applyFun2 -> f) z =
+    (L.scanl f z . L.filter p) `eqP` (unpackS . S.scanl f z . S.filter p)
+t_scanl (applyFun2 -> f) z       = L.scanl f z   `eqP` (unpackS . T.scanl f z)
+tl_scanl (applyFun2 -> f) z      = L.scanl f z   `eqP` (unpackS . TL.scanl f z)
+t_scanl1 (applyFun2 -> f)        = L.scanl1 f    `eqP` (unpackS . T.scanl1 f)
+tl_scanl1 (applyFun2 -> f)       = L.scanl1 f    `eqP` (unpackS . TL.scanl1 f)
+t_scanr (applyFun2 -> f) z       = L.scanr f z   `eqP` (unpackS . T.scanr f z)
+tl_scanr (applyFun2 -> f) z      = L.scanr f z   `eqP` (unpackS . TL.scanr f z)
+t_scanr1 (applyFun2 -> f)        = L.scanr1 f    `eqP` (unpackS . T.scanr1 f)
+tl_scanr1 (applyFun2 -> f)       = L.scanr1 f    `eqP` (unpackS . TL.scanr1 f)
 
-t_mapAccumL f z   = L.mapAccumL f z `eqP` (second unpackS . T.mapAccumL f z)
+t_mapAccumL_char c t =
+    snd (T.mapAccumL (const (const (0 :: Int, c))) 0 t) === T.replicate (T.length t) (T.singleton c)
+t_mapAccumL (applyFun2 -> f) z   = L.mapAccumL f z `eqP` (second unpackS . T.mapAccumL f z)
     where _types  = f :: Int -> Char -> (Int,Char)
-tl_mapAccumL f z  = L.mapAccumL f z `eqP` (second unpackS . TL.mapAccumL f z)
+tl_mapAccumL_char c t =
+    snd (TL.mapAccumL (const (const (0 :: Int, c))) 0 t) === TL.replicate (TL.length t) (TL.singleton c)
+tl_mapAccumL (applyFun2 -> f) z  = L.mapAccumL f z `eqP` (second unpackS . TL.mapAccumL f z)
     where _types  = f :: Int -> Char -> (Int,Char)
-t_mapAccumR f z   = L.mapAccumR f z `eqP` (second unpackS . T.mapAccumR f z)
+t_mapAccumR_char c t =
+    snd (T.mapAccumR (const (const (0 :: Int, c))) 0 t) === T.replicate (T.length t) (T.singleton c)
+t_mapAccumR (applyFun2 -> f) z   = L.mapAccumR f z `eqP` (second unpackS . T.mapAccumR f z)
     where _types  = f :: Int -> Char -> (Int,Char)
-tl_mapAccumR f z  = L.mapAccumR f z `eqP` (second unpackS . TL.mapAccumR f z)
+tl_mapAccumR_char c t =
+    snd (TL.mapAccumR (const (const (0 :: Int, c))) 0 t) === TL.replicate (TL.length t) (TL.singleton c)
+tl_mapAccumR (applyFun2 -> f) z  = L.mapAccumR f z `eqP` (second unpackS . TL.mapAccumR f z)
     where _types  = f :: Int -> Char -> (Int,Char)
 
 -- Unfolds
@@ -122,7 +147,8 @@ tl_cycle n        = (L.take m . L.cycle) `eq`
                     (unpackS . TL.take (fromIntegral m) . TL.cycle . packS)
     where m = fromIntegral (n :: Word8)
 
-tl_iterate f n    = (L.take m . L.iterate f) `eq`
+tl_iterate (applyFun -> f) n
+                  = (L.take m . L.iterate f) `eq`
                     (unpackS . TL.take (fromIntegral m) . TL.iterate f)
     where m = fromIntegral (n :: Word8)
 
@@ -202,9 +228,13 @@ testFolds =
     ],
 
     testGroup "mapAccum" [
+      testProperty "t_mapAccumL_char" t_mapAccumL_char,
       testProperty "t_mapAccumL" t_mapAccumL,
+      testProperty "tl_mapAccumL_char" tl_mapAccumL_char,
       testProperty "tl_mapAccumL" tl_mapAccumL,
+      testProperty "t_mapAccumR_char" t_mapAccumR_char,
       testProperty "t_mapAccumR" t_mapAccumR,
+      testProperty "tl_mapAccumR_char" tl_mapAccumR_char,
       testProperty "tl_mapAccumR" tl_mapAccumR
     ],
 

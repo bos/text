@@ -89,10 +89,10 @@ iter_ (Text arr off _len) i | m < 0xD800 || m > 0xDBFF = 1
 -- | /O(1)/ Iterate one step backwards through a UTF-16 array,
 -- returning the current character and the delta to add (i.e. a
 -- negative number) to give the next offset to iterate at.
-reverseIter :: Text -> Int -> (Char,Int)
+reverseIter :: Text -> Int ->  Iter
 reverseIter (Text arr off _len) i
-    | m < 0xDC00 || m > 0xDFFF = (unsafeChr m, -1)
-    | otherwise                = (chr2 n m,    -2)
+    | m < 0xDC00 || m > 0xDFFF = Iter (unsafeChr m) (-1)
+    | otherwise                = Iter (chr2 n m) (-2)
   where m = A.unsafeIndex arr j
         n = A.unsafeIndex arr k
         j = off + i

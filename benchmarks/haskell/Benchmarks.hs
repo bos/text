@@ -20,7 +20,6 @@ import qualified Benchmarks.EncodeUtf8 as EncodeUtf8
 import qualified Benchmarks.Equality as Equality
 import qualified Benchmarks.FileRead as FileRead
 import qualified Benchmarks.FoldLines as FoldLines
-import qualified Benchmarks.Mul as Mul
 import qualified Benchmarks.Multilang as Multilang
 import qualified Benchmarks.Pure as Pure
 import qualified Benchmarks.ReadNumbers as ReadNumbers
@@ -77,7 +76,6 @@ main = do
         , env (Equality.initEnv (tf "japanese.txt")) Equality.benchmark
         , FileRead.benchmark (tf "russian.txt")
         , FoldLines.benchmark (tf "russian.txt")
-        , env Mul.initEnv Mul.benchmark
         , Multilang.benchmark
         , bgroup "Pure"
             [ env (Pure.initEnv (tf "tiny.txt")) (Pure.benchmark "tiny")

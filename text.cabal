@@ -202,7 +202,6 @@ test-suite tests
     bytestring,
     deepseq,
     directory,
-    random,
     tasty,
     tasty-hunit,
     tasty-quickcheck,
@@ -229,8 +228,7 @@ benchmark text-benchmarks
                   filepath,
                   tasty-bench >= 0.2,
                   text,
-                  transformers,
-                  vector
+                  transformers
 
   hs-source-dirs: benchmarks/haskell
   main-is:        Benchmarks.hs
@@ -242,7 +240,6 @@ benchmark text-benchmarks
     Benchmarks.Equality
     Benchmarks.FileRead
     Benchmarks.FoldLines
-    Benchmarks.Mul
     Benchmarks.Multilang
     Benchmarks.Programs.BigTable
     Benchmarks.Programs.Cut

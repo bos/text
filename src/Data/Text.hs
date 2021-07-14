@@ -1163,7 +1163,7 @@ takeWhileEnd p t@(Text arr off len) = loop (len-1) len
   where loop !i !l | l <= 0    = t
                    | p c       = loop (i+d) (l+d)
                    | otherwise = text arr (off+l) (len-l)
-            where (c,d)        = reverseIter t i
+            where Iter c d     = reverseIter t i
 {-# INLINE [1] takeWhileEnd #-}
 
 -- | /O(n)/ 'dropWhile' @p@ @t@ returns the suffix remaining after
@@ -1189,7 +1189,7 @@ dropWhileEnd p t@(Text arr off len) = loop (len-1) len
   where loop !i !l | l <= 0    = empty
                    | p c       = loop (i+d) (l+d)
                    | otherwise = Text arr off l
-            where (c,d)        = reverseIter t i
+            where Iter c d     = reverseIter t i
 {-# INLINE [1] dropWhileEnd #-}
 
 -- | /O(n)/ 'dropAround' @p@ @t@ returns the substring remaining after

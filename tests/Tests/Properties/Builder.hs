@@ -14,7 +14,6 @@ import Test.QuickCheck
 import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.QuickCheck (testProperty)
 import Tests.QuickCheckUtils
-import Text.Show.Functions ()
 import qualified Data.List as L
 import qualified Data.Text.Lazy as TL
 import qualified Data.Text.Lazy.Builder as TB
@@ -54,10 +53,10 @@ tb_decimal_word16 (a::Word16) = tb_decimal a
 tb_decimal_word32 (a::Word32) = tb_decimal a
 tb_decimal_word64 (a::Word64) = tb_decimal a
 
-tb_decimal_big_int (BigBounded (a::Int)) = tb_decimal a
-tb_decimal_big_int64 (BigBounded (a::Int64)) = tb_decimal a
-tb_decimal_big_word (BigBounded (a::Word)) = tb_decimal a
-tb_decimal_big_word64 (BigBounded (a::Word64)) = tb_decimal a
+tb_decimal_big_int (Large (a::Int)) = tb_decimal a
+tb_decimal_big_int64 (Large (a::Int64)) = tb_decimal a
+tb_decimal_big_word (Large (a::Word)) = tb_decimal a
+tb_decimal_big_word64 (Large (a::Word64)) = tb_decimal a
 
 tb_hex :: (Integral a, Show a) => a -> Property
 tb_hex = (TB.toLazyText . TB.hexadecimal) `eq` (TL.pack . flip showHex "")

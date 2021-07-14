@@ -34,7 +34,7 @@ data FPFormat = Exponent
               | Generic
               -- ^ Use decimal notation for values between @0.1@ and
               -- @9,999,999@, and scientific notation otherwise.
-                deriving (Enum, Read, Show)
+                deriving (Enum, Read, Show, Bounded)
 
 -- | Show a signed 'RealFloat' value to full precision,
 -- using standard decimal notation for arguments whose absolute value lies

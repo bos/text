@@ -16,7 +16,6 @@ import Test.QuickCheck.Property (Property(..))
 import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.QuickCheck (testProperty)
 import Tests.QuickCheckUtils
-import Text.Show.Functions ()
 import qualified Control.Exception as Exception
 import qualified Data.Bits as Bits (shiftL, shiftR)
 import qualified Data.ByteString as B
@@ -108,7 +107,7 @@ t_utf8_err bad Nothing = forAll (choose ('\x10000', maxBound)) $ \c -> ioPropert
       "non-BMP replacement characters not supported" `T.isInfixOf` T.pack (show err)
     Right _  -> counterexample (show (decoded, l)) False
 -- generate a valid onErr
-t_utf8_err bad (Just de) = forAll (genDecodeErr de) $ \onErr -> ioProperty $ do
+t_utf8_err bad (Just de) = forAll (Blind <$> genDecodeErr de) $ \(Blind onErr) -> ioProperty $ do
   let decoded = E.decodeUtf8With onErr (toByteString bad)
       len = T.length (E.decodeUtf8With onErr (toByteString bad))
   l <- Exception.try (Exception.evaluate len)
@@ -194,7 +193,7 @@ t_decode_with_error4' =
     E.Some x _ _ -> x === "xaaa"
 
 t_infix_concat bs1 text bs2 =
-  forAll (genDecodeErr Replace) $ \onErr ->
+  forAll (Blind <$> genDecodeErr Replace) $ \(Blind onErr) ->
   text `T.isInfixOf`
     E.decodeUtf8With onErr (B.concat [bs1, E.encodeUtf8 text, bs2])
 

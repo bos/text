@@ -1,6 +1,7 @@
 -- | Tests for operations that don't fit in the other @Test.Properties.*@ modules.
 
 {-# LANGUAGE BangPatterns #-}
+{-# LANGUAGE ViewPatterns #-}
 {-# OPTIONS_GHC  -fno-warn-missing-signatures #-}
 module Tests.Properties.Text
     ( testText
@@ -14,7 +15,6 @@ import Test.QuickCheck
 import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.QuickCheck (testProperty)
 import Tests.QuickCheckUtils
-import Text.Show.Functions ()
 import qualified Data.Char as C
 import qualified Data.List as L
 import qualified Data.Text as T
@@ -38,16 +38,16 @@ tl_unstreamChunks x = f 11 x === f 1000 x
 tl_chunk_unchunk    = (TL.fromChunks . TL.toChunks) `eq` id
 tl_from_to_strict   = (TL.fromStrict . TL.toStrict) `eq` id
 
-s_map f           = map f  `eqP` (unpackS . S.map f)
-s_map_s f         = map f  `eqP` (unpackS . S.unstream . S.map f)
-sf_map p f        = (map f . L.filter p)  `eqP` (unpackS . S.map f . S.filter p)
+s_map (applyFun -> f)   = map f  `eqP` (unpackS . S.map f)
+s_map_s (applyFun -> f) = map f  `eqP` (unpackS . S.unstream . S.map f)
+sf_map (applyFun -> p) (applyFun -> f) = (map f . L.filter p)  `eqP` (unpackS . S.map f . S.filter p)
 
-t_map f           = map f  `eqP` (unpackS . T.map f)
-tl_map f          = map f  `eqP` (unpackS . TL.map f)
-t_map_map f g     = (map f . map g) `eqP` (unpackS . T.map f . T.map g)
-tl_map_map f g    = (map f . map g)  `eqP` (unpackS . TL.map f . TL.map g)
-t_length_map f    = (L.length . map f)  `eqP` (T.length . T.map f)
-tl_length_map f   = (L.genericLength . map f)  `eqP` (TL.length . TL.map f)
+t_map (applyFun -> f)                      = map f  `eqP` (unpackS . T.map f)
+tl_map (applyFun -> f)                     = map f  `eqP` (unpackS . TL.map f)
+t_map_map (applyFun -> f) (applyFun -> g)  = (map f . map g) `eqP` (unpackS . T.map f . T.map g)
+tl_map_map (applyFun -> f) (applyFun -> g) = (map f . map g)  `eqP` (unpackS . TL.map f . TL.map g)
+t_length_map (applyFun -> f)               = (L.length . map f)  `eqP` (T.length . T.map f)
+tl_length_map (applyFun -> f)              = (L.genericLength . map f)  `eqP` (TL.length . TL.map f)
 
 s_intercalate c   = (L.intercalate c . unSqrt) `eq`
                     (unpackS . S.intercalate (packS c) . map packS . unSqrt)
@@ -63,7 +63,8 @@ s_intersperse c   = L.intersperse c `eqP`
                     (unpackS . S.intersperse c)
 s_intersperse_s c = L.intersperse c `eqP`
                     (unpackS . S.unstream . S.intersperse c)
-sf_intersperse p c= (L.intersperse c . L.filter p) `eqP`
+sf_intersperse (applyFun -> p) c
+                  = (L.intersperse c . L.filter p) `eqP`
                    (unpackS . S.intersperse c . S.filter p)
 t_intersperse c   = L.intersperse c `eqPSqrt` (unpackS . T.intersperse c)
 tl_intersperse c  = L.intersperse c `eqPSqrt` (unpackS . TL.intersperse c)
@@ -95,7 +96,7 @@ splitOn pat src0
 
 s_toCaseFold_length xs = S.length (S.toCaseFold s) >= length xs
     where s = S.streamList xs
-sf_toCaseFold_length p xs =
+sf_toCaseFold_length (applyFun -> p) xs =
     (S.length . S.toCaseFold . S.filter p $ s) >= (length . L.filter p $ xs)
     where s = S.streamList xs
 t_toCaseFold_length t = T.length (T.toCaseFold t) >= T.length t
@@ -142,7 +143,8 @@ s_justifyLeft k c = justifyLeft j c `eqP` (unpackS . S.justifyLeftI j c)
 s_justifyLeft_s k c = justifyLeft j c `eqP`
                       (unpackS . S.unstream . S.justifyLeftI j c)
     where j = fromIntegral (k :: Word8)
-sf_justifyLeft p k c = (justifyLeft j c . L.filter p) `eqP`
+sf_justifyLeft (applyFun -> p) k c
+                    = (justifyLeft j c . L.filter p) `eqP`
                        (unpackS . S.justifyLeftI j c . S.filter p)
     where j = fromIntegral (k :: Word8)
 t_justifyLeft k c = justifyLeft j c `eqP` (unpackS . T.justifyLeft j c)
@@ -162,24 +164,31 @@ tl_center k c = center j c `eqP` (unpackS . TL.center (fromIntegral j) c)
 
 t_elem c          = L.elem c `eqP` T.elem c
 tl_elem c         = L.elem c `eqP` TL.elem c
-sf_elem p c       = (L.elem c . L.filter p) `eqP` (S.elem c . S.filter p)
-sf_filter q p     = (L.filter p . L.filter q) `eqP`
-                    (unpackS . S.filter p . S.filter q)
+sf_elem (applyFun -> p) c = (L.elem c . L.filter p) `eqP` (S.elem c . S.filter p)
+sf_filter (applyFun -> q) (applyFun -> p)
+                  = (L.filter p . L.filter q) `eqP` (unpackS . S.filter p . S.filter q)
 
-t_filter p           = L.filter p    `eqP` (unpackS . T.filter p)
-tl_filter p          = L.filter p    `eqP` (unpackS . TL.filter p)
-t_filter_filter p q  = (L.filter p . L.filter q) `eqP` (unpackS . T.filter p . T.filter q)
-tl_filter_filter p q = (L.filter p . L.filter q) `eqP` (unpackS . TL.filter p . TL.filter q)
-t_length_filter p    = (L.length . L.filter p) `eqP` (T.length . T.filter p)
-tl_length_filter p   = (L.genericLength . L.filter p) `eqP` (TL.length . TL.filter p)
+t_filter (applyFun -> p)
+                  = L.filter p    `eqP` (unpackS . T.filter p)
+tl_filter (applyFun -> p)
+                  = L.filter p    `eqP` (unpackS . TL.filter p)
+t_filter_filter (applyFun -> p) (applyFun -> q)
+                  = (L.filter p . L.filter q) `eqP` (unpackS . T.filter p . T.filter q)
+tl_filter_filter (applyFun -> p) (applyFun -> q)
+                  = (L.filter p . L.filter q) `eqP` (unpackS . TL.filter p . TL.filter q)
+t_length_filter (applyFun -> p)
+                  = (L.length . L.filter p) `eqP` (T.length . T.filter p)
+tl_length_filter (applyFun -> p)
+                  = (L.genericLength . L.filter p) `eqP` (TL.length . TL.filter p)
 
-sf_findBy q p     = (L.find p . L.filter q) `eqP` (S.findBy p . S.filter q)
-t_find p          = L.find p      `eqP` T.find p
-tl_find p         = L.find p      `eqP` TL.find p
-t_partition p     = L.partition p `eqP` (unpack2 . T.partition p)
-tl_partition p    = L.partition p `eqP` (unpack2 . TL.partition p)
+sf_findBy (applyFun -> q) (applyFun -> p)
+                             = (L.find p . L.filter q) `eqP` (S.findBy p . S.filter q)
+t_find (applyFun -> p)       = L.find p      `eqP` T.find p
+tl_find (applyFun -> p)      = L.find p      `eqP` TL.find p
+t_partition (applyFun -> p)  = L.partition p `eqP` (unpack2 . T.partition p)
+tl_partition (applyFun -> p) = L.partition p `eqP` (unpack2 . TL.partition p)
 
-sf_index p s i    = ((L.filter p s L.!!) `eq` S.index (S.filter p $ packS s)) j
+sf_index (applyFun -> p) s i = ((L.filter p s L.!!) `eq` S.index (S.filter p $ packS s)) j
     where l = L.length s
           j = if l == 0 then 0 else i `mod` (3 * l) - l
 t_index s i       = ((s L.!!) `eq` T.index (packS s)) j
@@ -190,18 +199,19 @@ tl_index s i      = ((s L.!!) `eq` (TL.index (packS s) . fromIntegral)) j
     where l = L.length s
           j = if l == 0 then 0 else i `mod` (3 * l) - l
 
-t_findIndex p     = L.findIndex p `eqP` T.findIndex p
+t_findIndex (applyFun -> p) = L.findIndex p `eqP` T.findIndex p
 t_count (NotEmpty t)  = (subtract 1 . L.length . T.splitOn t) `eq` T.count t
 tl_count (NotEmpty t) = (subtract 1 . L.genericLength . TL.splitOn t) `eq`
                         TL.count t
 t_zip s           = L.zip s `eqP` T.zip (packS s)
 tl_zip s          = L.zip s `eqP` TL.zip (packS s)
-sf_zipWith p c s  = (L.zipWith c (L.filter p s) . L.filter p) `eqP`
+sf_zipWith (applyFun -> p) (applyFun2 -> c) s
+                  = (L.zipWith c (L.filter p s) . L.filter p) `eqP`
                     (unpackS . S.zipWith c (S.filter p $ packS s) . S.filter p)
-t_zipWith c s     = L.zipWith c s `eqP` (unpackS . T.zipWith c (packS s))
-tl_zipWith c s    = L.zipWith c s `eqP` (unpackS . TL.zipWith c (packS s))
-t_length_zipWith c s  = (L.length . L.zipWith c s) `eqP` (T.length . T.zipWith c (packS s))
-tl_length_zipWith c s = (L.genericLength . L.zipWith c s) `eqP` (TL.length . TL.zipWith c (packS s))
+t_zipWith (applyFun2 -> c) s         = L.zipWith c s `eqP` (unpackS . T.zipWith c (packS s))
+tl_zipWith (applyFun2 -> c) s        = L.zipWith c s `eqP` (unpackS . TL.zipWith c (packS s))
+t_length_zipWith (applyFun2 -> c) s  = (L.length . L.zipWith c s) `eqP` (T.length . T.zipWith c (packS s))
+tl_length_zipWith (applyFun2 -> c) s = (L.genericLength . L.zipWith c s) `eqP` (TL.length . TL.zipWith c (packS s))
 
 t_indices  (NotEmpty s) = Slow.indices s `eq` T.indices s
 tl_indices (NotEmpty s) = lazyIndices s `eq` S.indices s
