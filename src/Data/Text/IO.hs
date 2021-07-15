@@ -89,7 +89,7 @@ readFile name = openFile name ReadMode >>= hGetContents
 writeFile :: FilePath -> Text -> IO ()
 writeFile p = withFile p WriteMode . flip hPutStr
 
--- | Write a string the end of a file.
+-- | Write a string to the end of a file.
 appendFile :: FilePath -> Text -> IO ()
 appendFile p = withFile p AppendMode . flip hPutStr
 
